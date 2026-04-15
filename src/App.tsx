@@ -46,27 +46,27 @@ const USER_DATA = {
       title: "NotaLink",
       desc: "A web-based academic note-sharing portal featuring REST API endpoints for secure file management and subject-based categorization.",
       tech: ["Flask", "SQLite", "JavaScript", "REST"],
-      link: "https://github.com/kartikey-singh",
+      link: "https://github.com/kartikey-x/NotaLink",
       featured: true
     },
     {
       title: "StegoSafe",
       desc: "An advanced information-hiding tool utilizing LSB steganography to securely embed and extract data within image payloads.",
       tech: ["Python", "Steganography", "Security"],
-      link: "https://github.com/kartikey-singh"
+      link: "https://github.com/kartikey-x/StegoSafe-OpenInnovation"
     },
     {
       title: "ExamPrepBuddy",
       desc: "A modular CLI-based study optimization tool that automates plan organization and tracks completion metrics across multiple subjects.",
       tech: ["Python", "File I/O", "Modular Design"],
-      link: "https://github.com/kartikey-singh"
+      link: "https://github.com/kartikey-x/ExamPreparationBuddy"
     }
   ],
   contact: {
     email: "kartikeysingh2007@gmail.com",
     socials: [
-      { name: "GitHub", icon: <Github className="w-5 h-5" />, link: "https://github.com/kartikey-singh" },
-      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://linkedin.com/in/kartikey-singh" }
+      { name: "GitHub", icon: <Github className="w-5 h-5" />, link: "https://github.com/kartikey-x" },
+      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://www.linkedin.com/in/kartikey-singh-538bba276/" }
     ]
   }
 };
@@ -507,7 +507,7 @@ export default function App() {
         {/* Footer */}
         <footer className="text-center">
           <p className="text-[10px] uppercase tracking-[0.5em] text-primary/30">
-            © {new Date().getFullYear()} Alex Chen — Designed for Flow
+            © {new Date().getFullYear()} Kartikey Singh — Designed for Flow
           </p>
         </footer>
 
