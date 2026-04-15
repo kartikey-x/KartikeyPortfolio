@@ -27,46 +27,46 @@ import { Card, CardContent } from "@/components/ui/card";
  * USER_DATA: The single source of truth for the portfolio content.
  */
 const USER_DATA = {
-  name: "Alex Chen",
-  role: "AI/ML & Engineering Student",
-  bio: "Specializing in hardware-accelerated machine learning and high-performance engineering. Focused on building the next generation of intelligent systems that feel as natural as they are powerful.",
+  name: "Kartikey Singh",
+  role: "AI/ML Engineer & Full-Stack Developer",
+  bio: "B.Tech CSE student specializing in Artificial Intelligence and Machine Learning. Experienced in building Python-based tools and robust web applications with a focus on RESTful architectures and data-driven systems.",
   hardware: {
-    primary: "MacBook Pro M4 Max",
-    specs: "128GB RAM, 40-core GPU",
-    description: "Optimized for local LLM inference and complex neural simulations."
+    primary: "High-Performance Workstation",
+    specs: "Optimized for AI/ML Workloads",
+    description: "Configured for local model training, data analysis using NumPy/Pandas, and full-stack backend development."
   },
   skills: [
-    { name: "Machine Learning", icon: <Cpu className="w-4 h-4" />, level: "Advanced" },
-    { name: "Systems Engineering", icon: <Terminal className="w-4 h-4" />, level: "Expert" },
+    { name: "Machine Learning", icon: <Cpu className="w-4 h-4" />, level: "Specialist" },
+    { name: "Backend Architecture", icon: <Terminal className="w-4 h-4" />, level: "Expert" },
     { name: "Full-Stack Dev", icon: <Code2 className="w-4 h-4" />, level: "Proficient" },
-    { name: "Hardware Optimization", icon: <Zap className="w-4 h-4" />, level: "Specialist" },
+    { name: "Network Engineering", icon: <Zap className="w-4 h-4" />, level: "Certified" },
   ],
   projects: [
     {
       title: "NotaLink",
-      desc: "A neural-symbolic knowledge graph that maps human intuition to structured data. Built for high-speed research and discovery.",
-      tech: ["Python", "PyTorch", "React", "Rust"],
-      link: "#",
+      desc: "A web-based academic note-sharing portal featuring REST API endpoints for secure file management and subject-based categorization.",
+      tech: ["Flask", "SQLite", "JavaScript", "REST"],
+      link: "https://github.com/kartikey-singh",
       featured: true
     },
     {
-      title: "Core-X Optimizer",
-      desc: "Low-level hardware abstraction layer for M-series silicon, optimizing matrix multiplications for real-time inference.",
-      tech: ["C++", "Metal", "Swift"],
-      link: "#"
+      title: "StegoSafe",
+      desc: "An advanced information-hiding tool utilizing LSB steganography to securely embed and extract data within image payloads.",
+      tech: ["Python", "Steganography", "Security"],
+      link: "https://github.com/kartikey-singh"
     },
     {
-      title: "Zenith OS",
-      desc: "A minimalist, focus-driven operating system concept designed for deep work and cognitive flow.",
-      tech: ["TypeScript", "Wasm", "Tailwind"],
-      link: "#"
+      title: "ExamPrepBuddy",
+      desc: "A modular CLI-based study optimization tool that automates plan organization and tracks completion metrics across multiple subjects.",
+      tech: ["Python", "File I/O", "Modular Design"],
+      link: "https://github.com/kartikey-singh"
     }
   ],
   contact: {
-    email: "alex.chen@edu.com",
+    email: "kartikeysingh2007@gmail.com",
     socials: [
-      { name: "GitHub", icon: <Github className="w-5 h-5" />, link: "https://github.com" },
-      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://linkedin.com" }
+      { name: "GitHub", icon: <Github className="w-5 h-5" />, link: "https://github.com/kartikey-singh" },
+      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://linkedin.com/in/kartikey-singh" }
     ]
   }
 };
