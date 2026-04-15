@@ -95,6 +95,38 @@
     --input: oklch(1 0 0 / 10%);
     --ring: oklch(0.8 0.1 280 / 0.5);
 }
+@layer utilities {@layer utilities {
+  .animate-ambient-shift {
+    background-size: 200% 200%;
+    animation: ambient-shift 25s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes ambient-shift {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+  .animate-gradient-xy {
+    background-size: 300% 300%;
+    animation: gradient-xy 15s ease infinite;
+  }
+}
+
+@keyframes gradient-xy {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
 @layer base {
   * {
@@ -150,3 +182,4 @@ canvas {
 .magnetic-area {
   @apply relative inline-flex items-center justify-center;
 }
+
