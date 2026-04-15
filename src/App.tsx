@@ -4,24 +4,24 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from "motion/react";
-import { 
-  Cpu, 
-  Code2, 
-  Globe, 
-  Mail, 
-  Github, 
-  Linkedin, 
-  ExternalLink, 
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from "motion/react";
+import {
+  Cpu,
+  Code2,
+  Globe,
+  Mail,
+  Github,
+  Linkedin,
+  ExternalLink,
   ChevronRight,
   Terminal,
   Layers,
   Zap,
   Monitor
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/src/lib/utils";
+import { Button } from "@/src/components/ui/button";
+import { Card, CardContent } from "@/src/components/ui/card";
 
 /**
  * USER_DATA: The single source of truth for the portfolio content.
@@ -118,7 +118,6 @@ function Magnetic({ children, className }: { children: React.ReactNode; classNam
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // High damping and low stiffness for "heavy but smooth" feel
   const springX = useSpring(x, { damping: 40, stiffness: 80 });
   const springY = useSpring(y, { damping: 40, stiffness: 80 });
 
@@ -154,40 +153,291 @@ function Magnetic({ children, className }: { children: React.ReactNode; classNam
 }
 
 /**
- * BreatheBackground: Optimized for performance.
- * Removed rotation and simplified scaling to reduce GPU load on large blurred elements.
+ * InteractiveOrbBackground: A canvas-based interactive orb system
+ * that reacts to both mouse movement and scroll position.
+ * Optimized for Apple Silicon with Canvas 2D.
  */
-function BreatheBackground() {
+interface Orb {
+  x: number;
+  y: number;
+  baseX: number;
+  baseY: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  baseRadius: number;
+  color: string;
+  alpha: number;
+  baseAlpha: number;
+  pulseSpeed: number;
+  pulsePhase: number;
+  driftSpeed: number;
+  driftAngle: number;
+  driftRadius: number;
+  mass: number;
+  glowIntensity: number;
+}
+
+function InteractiveOrbBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const scrollRef = useRef(0);
+  const orbsRef = useRef<Orb[]>([]);
+  const animationRef = useRef<number>(0);
+  const timeRef = useRef(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d", { alpha: true })!;
+
+    const colors = [
+      "138, 43, 226",
+      "112, 26, 255",
+      "75, 0, 130",
+      "186, 85, 211",
+      "148, 0, 211",
+      "72, 61, 139",
+      "123, 44, 191",
+      "88, 28, 135",
+      "167, 139, 250",
+      "59, 7, 100",
+    ];
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    };
+
+    const createOrbs = (): Orb[] => {
+      const orbs: Orb[] = [];
+      const count = Math.min(18, Math.floor((width * height) / 80000));
+
+      for (let i = 0; i < count; i++) {
+        const baseRadius = 80 + Math.random() * 200;
+        const baseAlpha = 0.03 + Math.random() * 0.07;
+        orbs.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          baseX: Math.random() * width,
+          baseY: Math.random() * height,
+          vx: 0,
+          vy: 0,
+          radius: baseRadius,
+          baseRadius,
+          color: colors[i % colors.length],
+          alpha: baseAlpha,
+          baseAlpha,
+          pulseSpeed: 0.3 + Math.random() * 0.8,
+          pulsePhase: Math.random() * Math.PI * 2,
+          driftSpeed: 0.15 + Math.random() * 0.3,
+          driftAngle: Math.random() * Math.PI * 2,
+          driftRadius: 50 + Math.random() * 150,
+          mass: 0.5 + Math.random() * 1.5,
+          glowIntensity: 0.5 + Math.random() * 0.5,
+        });
+      }
+
+      for (let i = 0; i < 4; i++) {
+        const baseRadius = 300 + Math.random() * 400;
+        orbs.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          baseX: Math.random() * width,
+          baseY: Math.random() * height,
+          vx: 0,
+          vy: 0,
+          radius: baseRadius,
+          baseRadius,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          alpha: 0.015 + Math.random() * 0.025,
+          baseAlpha: 0.015 + Math.random() * 0.025,
+          pulseSpeed: 0.1 + Math.random() * 0.2,
+          pulsePhase: Math.random() * Math.PI * 2,
+          driftSpeed: 0.05 + Math.random() * 0.1,
+          driftAngle: Math.random() * Math.PI * 2,
+          driftRadius: 30 + Math.random() * 80,
+          mass: 2 + Math.random() * 2,
+          glowIntensity: 0.3 + Math.random() * 0.3,
+        });
+      }
+      return orbs;
+    };
+
+    resize();
+    orbsRef.current = createOrbs();
+
+    const onMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const onScroll = () => {
+      scrollRef.current = window.scrollY;
+    };
+
+    const onMouseLeave = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
+
+    const drawOrb = (orb: Orb) => {
+      const gradient = ctx.createRadialGradient(
+        orb.x, orb.y, 0,
+        orb.x, orb.y, orb.radius
+      );
+
+      gradient.addColorStop(0, `rgba(${orb.color}, ${orb.alpha * 2.5 * orb.glowIntensity})`);
+      gradient.addColorStop(0.3, `rgba(${orb.color}, ${orb.alpha * 1.2})`);
+      gradient.addColorStop(0.6, `rgba(${orb.color}, ${orb.alpha * 0.4})`);
+      gradient.addColorStop(1, `rgba(${orb.color}, 0)`);
+
+      ctx.beginPath();
+      ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+    };
+
+    const animate = () => {
+      timeRef.current += 0.008;
+      const t = timeRef.current;
+      const mouse = mouseRef.current;
+      const scroll = scrollRef.current;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const ambientGradient = ctx.createRadialGradient(
+        width / 2, height / 2, 0,
+        width / 2, height / 2, width * 0.6
+      );
+      ambientGradient.addColorStop(0, `rgba(112, 26, 255, 0.02)`);
+      ambientGradient.addColorStop(1, `rgba(0, 0, 0, 0)`);
+      ctx.fillStyle = ambientGradient;
+      ctx.fillRect(0, 0, width, height);
+
+      for (const orb of orbsRef.current) {
+        const driftX = Math.cos(t * orb.driftSpeed + orb.driftAngle) * orb.driftRadius;
+        const driftY = Math.sin(t * orb.driftSpeed * 0.7 + orb.driftAngle + 1.5) * orb.driftRadius;
+
+        const scrollOffset = scroll * (0.05 + orb.mass * 0.03);
+
+        let targetX = orb.baseX + driftX;
+        let targetY = orb.baseY + driftY - scrollOffset % (height * 2);
+
+        if (targetY < -orb.radius * 2) targetY += height + orb.radius * 4;
+        if (targetY > height + orb.radius * 2) targetY -= height + orb.radius * 4;
+
+        const dx = mouse.x - orb.x;
+        const dy = mouse.y - orb.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const interactionRadius = 400;
+
+        if (dist < interactionRadius && dist > 0) {
+          const force = (1 - dist / interactionRadius);
+          const forceStrength = force * force * 60;
+
+          if (orb.baseRadius < 200) {
+            targetX += (dx / dist) * forceStrength;
+            targetY += (dy / dist) * forceStrength;
+          } else {
+            targetX -= (dx / dist) * forceStrength * 0.3;
+            targetY -= (dy / dist) * forceStrength * 0.3;
+          }
+
+          orb.alpha = orb.baseAlpha + force * 0.08;
+          orb.radius = orb.baseRadius + force * 40;
+          orb.glowIntensity = 0.5 + force * 1.5;
+        } else {
+          orb.alpha += (orb.baseAlpha - orb.alpha) * 0.02;
+          orb.radius += (orb.baseRadius - orb.radius) * 0.02;
+          orb.glowIntensity += ((0.5 + Math.random() * 0.5) - orb.glowIntensity) * 0.01;
+        }
+
+        const pulse = Math.sin(t * orb.pulseSpeed + orb.pulsePhase) * 0.15 + 1;
+        orb.radius *= pulse;
+        orb.alpha *= (0.85 + pulse * 0.15);
+
+        orb.vx += (targetX - orb.x) * 0.008;
+        orb.vy += (targetY - orb.y) * 0.008;
+        orb.vx *= 0.95;
+        orb.vy *= 0.95;
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+
+        drawOrb(orb);
+      }
+
+      ctx.lineWidth = 1;
+      for (let i = 0; i < orbsRef.current.length; i++) {
+        for (let j = i + 1; j < orbsRef.current.length; j++) {
+          const a = orbsRef.current[i];
+          const b = orbsRef.current[j];
+          const ddx = a.x - b.x;
+          const ddy = a.y - b.y;
+          const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+          const maxDist = 350;
+
+          if (dist < maxDist) {
+            const opacity = (1 - dist / maxDist) * 0.06;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(138, 43, 226, ${opacity})`;
+            ctx.stroke();
+          }
+        }
+      }
+
+      if (mouse.x > 0 && mouse.y > 0) {
+        const cursorGlow = ctx.createRadialGradient(
+          mouse.x, mouse.y, 0,
+          mouse.x, mouse.y, 250
+        );
+        cursorGlow.addColorStop(0, `rgba(167, 139, 250, 0.04)`);
+        cursorGlow.addColorStop(0.5, `rgba(112, 26, 255, 0.015)`);
+        cursorGlow.addColorStop(1, `rgba(0, 0, 0, 0)`);
+        ctx.fillStyle = cursorGlow;
+        ctx.fillRect(mouse.x - 250, mouse.y - 250, 500, 500);
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("mouseleave", onMouseLeave);
+
+    const onResize = () => {
+      resize();
+      orbsRef.current = createOrbs();
+    };
+    window.addEventListener("resize", onResize);
+
+    animationRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("mouseleave", onMouseLeave);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-[#050208]">
-      <motion.div 
-        className="absolute -top-[20%] -left-[10%] w-[80%] h-[80%] rounded-full bg-primary/10 blur-[100px] will-change-transform"
-        animate={{
-          x: [0, 50, 0],
-          y: [0, 30, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear"
-        }}
-      />
-      <motion.div 
-        className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] rounded-full bg-[#4c1d95]/10 blur-[80px] will-change-transform"
-        animate={{
-          x: [0, -40, 0],
-          y: [0, -20, 0],
-          scale: [1, 1.15, 1],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "linear",
-          delay: 2
-        }}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 -z-10 pointer-events-none"
+      style={{ background: "#050208" }}
+    />
   );
 }
 
@@ -218,16 +468,14 @@ function SoftReveal({ children, delay = 0 }: { children: React.ReactNode; delay?
 export default function App() {
   const [activeSection, setActiveSection] = useState("home");
   const { scrollY, scrollYProgress } = useScroll();
-  
-  // Navigation fade and lift effect
+
   const navOpacity = useTransform(scrollY, [0, 150], [1, 0]);
   const navY = useTransform(scrollY, [0, 150], [0, -50]);
-  
-  // Epic Scroll Parallax for Hero
+
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.9]);
-  
+
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
@@ -239,16 +487,16 @@ export default function App() {
       {/* Visual Overlays */}
       <CustomCursor />
       <div className="grain" />
-      <BreatheBackground />
-      
+      <InteractiveOrbBackground />
+
       {/* Progress Bar */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-1 bg-primary/30 z-50 origin-left"
         style={{ scaleX }}
       />
 
-      {/* Top Navigation Bubbles - Fades away upwards on scroll */}
-      <motion.nav 
+      {/* Top Navigation Bubbles */}
+      <motion.nav
         style={{ opacity: navOpacity, y: navY }}
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 pointer-events-auto"
       >
@@ -258,11 +506,11 @@ export default function App() {
               <motion.button
                 initial={{ y: -50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ 
-                  type: "spring", 
-                  damping: 20, 
-                  stiffness: 100, 
-                  delay: 0.1 * i 
+                transition={{
+                  type: "spring",
+                  damping: 20,
+                  stiffness: 100,
+                  delay: 0.1 * i
                 }}
                 onClick={() => {
                   setActiveSection(section);
@@ -282,10 +530,10 @@ export default function App() {
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-6 pt-48 pb-48">
-        
+
         {/* Hero Section */}
-        <motion.section 
-          id="home" 
+        <motion.section
+          id="home"
           style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
           className="min-h-[70vh] flex flex-col justify-center mb-32"
         >
@@ -296,7 +544,7 @@ export default function App() {
                 Digital Sanctuary
               </span>
             </div>
-            
+
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.1] text-foreground">
               {USER_DATA.name.split(" ").map((word, i) => (
                 <span key={i} className="block overflow-hidden">
@@ -311,7 +559,7 @@ export default function App() {
                 </span>
               ))}
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-muted-foreground font-medium max-w-2xl leading-relaxed mb-12">
               {USER_DATA.bio}
             </p>
@@ -319,9 +567,9 @@ export default function App() {
             <div className="flex flex-wrap gap-6">
               <Magnetic>
                 <motion.div whileTap={{ scale: 0.96 }}>
-                  <Button 
-                    variant="default" 
-                    size="lg" 
+                  <Button
+                    variant="default"
+                    size="lg"
                     className="rounded-full px-10 h-16 text-sm uppercase tracking-widest font-black transition-transform bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl shadow-primary/20"
                     onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
                   >
@@ -331,9 +579,9 @@ export default function App() {
               </Magnetic>
               <Magnetic>
                 <motion.div whileTap={{ scale: 0.96 }}>
-                  <Button 
-                    variant="outline" 
-                    size="lg" 
+                  <Button
+                    variant="outline"
+                    size="lg"
                     className="rounded-full px-10 h-16 text-sm uppercase tracking-widest font-black glass hover:bg-primary/10 border-primary/20 text-foreground shadow-xl"
                     onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
                   >
@@ -349,7 +597,7 @@ export default function App() {
         <section className="mb-48">
           <SoftReveal>
             <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -5 }}
                 className="glass p-8 md:p-12 rounded-[2rem] relative overflow-hidden group border-primary/10"
               >
@@ -426,7 +674,7 @@ export default function App() {
                             {project.desc}
                           </p>
                           <Magnetic>
-                            <a 
+                            <a
                               href={project.link}
                               className="inline-flex items-center gap-3 text-sm uppercase tracking-[0.3em] font-bold hover:gap-6 transition-all text-primary"
                             >
@@ -453,15 +701,15 @@ export default function App() {
             <div className="grid md:grid-cols-3 gap-16">
               <div className="md:col-span-1">
                 <h3 className="text-xs uppercase tracking-[0.3em] text-primary/60 mb-4 font-bold">Expertise</h3>
-                <h2 className="text-5xl font-bold tracking-tight mb-8 text-foreground leading-none">Technical <br/><span className="italic text-primary">Stack</span></h2>
+                <h2 className="text-5xl font-bold tracking-tight mb-8 text-foreground leading-none">Technical <br /><span className="italic text-primary">Stack</span></h2>
                 <p className="text-lg text-muted-foreground leading-relaxed font-bold">
                   Bridging the gap between high-level abstraction and low-level optimization.
                 </p>
               </div>
               <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {USER_DATA.skills.map((skill, idx) => (
-                  <motion.div 
-                    key={skill.name} 
+                  <motion.div
+                    key={skill.name}
                     initial={{ scale: 0.8, opacity: 0 }}
                     whileInView={{ scale: 1, opacity: 1 }}
                     viewport={{ once: true }}
@@ -486,20 +734,20 @@ export default function App() {
         {/* Contact Section */}
         <section id="contact" className="mb-32">
           <SoftReveal>
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.01 }}
               className="glass p-12 md:p-24 rounded-[3rem] text-center relative overflow-hidden border-primary/20 shadow-[0_0_100px_rgba(112,26,255,0.1)]"
             >
               <div className="absolute inset-0 bg-linear-to-b from-primary/20 to-transparent pointer-events-none" />
-              
+
               <h3 className="text-xs uppercase tracking-[0.5em] text-primary/60 mb-10 font-bold">Available for collaboration</h3>
               <h2 className="text-6xl md:text-8xl font-bold tracking-tight mb-16 text-foreground leading-none">
-                Let's build the <br/><span className="italic text-primary drop-shadow-[0_0_30px_rgba(112,26,255,0.3)]">future</span>.
+                Let's build the <br /><span className="italic text-primary drop-shadow-[0_0_30px_rgba(112,26,255,0.3)]">future</span>.
               </h2>
-              
+
               <div className="flex flex-col items-center gap-12">
                 <Magnetic>
-                  <motion.a 
+                  <motion.a
                     href={`mailto:${USER_DATA.contact.email}`}
                     whileHover={{ scale: 1.05, y: -5 }}
                     className="text-2xl md:text-5xl font-bold hover:text-primary transition-all flex items-center gap-6 group text-foreground tracking-tighter"
@@ -508,12 +756,12 @@ export default function App() {
                     <ChevronRight className="w-10 h-10 opacity-0 -translate-x-6 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
                   </motion.a>
                 </Magnetic>
-                
+
                 <div className="flex gap-10 mt-12">
                   {USER_DATA.contact.socials.map((social) => (
                     <div key={social.name}>
                       <Magnetic>
-                        <motion.a 
+                        <motion.a
                           href={social.link}
                           target="_blank"
                           rel="noopener noreferrer"
