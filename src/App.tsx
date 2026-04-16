@@ -482,7 +482,6 @@ function InteractiveBackground() {
 }
 
 // ─── SCROLL VELOCITY TEXT ───
-// ─── SCROLL VELOCITY TEXT ───
 function ScrollVelocityText({ text, className }: { text: string; className?: string }) {
   const { scrollY } = useScroll();
   const baseX = useMotionValue(0);
@@ -500,8 +499,9 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
   useEffect(() => {
     let raf: number;
     const animate = () => {
-      // FIX: Dropped base speed from 0.5 to 0.15. Dampened scroll multiplier to 0.05.
-      let moveBy = direction.current * Math.max(0.15, velocity.current * 0.05);
+      // FIX: Reduced base speed from 0.5 to 0.15 (30%)
+      // FIX: Reduced scroll multiplier from 0.1 to 0.03 (30%)
+      let moveBy = direction.current * Math.max(0.15, velocity.current * 0.03);
       let currentX = baseX.get() + moveBy;
 
       // The true infinite loop math. Wrap seamlessly at exactly -50%.
@@ -517,7 +517,7 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
     };
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [baseX]);
 
   return (
     <div className={cn("overflow-hidden whitespace-nowrap flex", className)}>
