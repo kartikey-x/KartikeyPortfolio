@@ -98,30 +98,30 @@ function CustomCursor() {
   const fy = useSpring(followerY, { damping: 18, stiffness: 120 });
 
   useEffect(() => {
+    // We track state locally in the loop to prevent React from re-rendering
+    // hundreds of times when mousing over deeply nested SVG/Div elements.
+    let currentHoverState = false;
+
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX - 6);
       cursorY.set(e.clientY - 6);
       followerX.set(e.clientX - 24);
       followerY.set(e.clientY - 24);
-    };
 
-    const handleOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('a, button, [role="button"], .magnetic-area')) {
-        setIsHovering(true);
+      const isHoverable = !!target.closest('a, button, [role="button"], .magnetic-area');
+      
+      if (isHoverable !== currentHoverState) {
+        currentHoverState = isHoverable;
+        setIsHovering(isHoverable);
       }
     };
-    const handleOut = () => setIsHovering(false);
 
-    window.addEventListener("mousemove", moveCursor);
-    document.addEventListener("mouseover", handleOver);
-    document.addEventListener("mouseout", handleOut);
+    window.addEventListener("mousemove", moveCursor, { passive: true });
     return () => {
       window.removeEventListener("mousemove", moveCursor);
-      document.removeEventListener("mouseover", handleOver);
-      document.removeEventListener("mouseout", handleOut);
     };
-  }, []);
+  }, [cursorX, cursorY, followerX, followerY]);
 
   return (
     <>
@@ -482,6 +482,7 @@ function InteractiveBackground() {
 }
 
 // ─── SCROLL VELOCITY TEXT ───
+// FIX: Removed the massive CPU leak caused by passing a continuous loop into a physics spring.
 function ScrollVelocityText({ text, className }: { text: string; className?: string }) {
   const { scrollY } = useScroll();
   const baseX = useMotionValue(0);
@@ -507,13 +508,11 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
     };
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
-  }, []);
-
-  const x = useSpring(baseX, { damping: 50, stiffness: 100 });
+  }, [baseX]);
 
   return (
     <div className={cn("overflow-hidden whitespace-nowrap", className)}>
-      <motion.div className="inline-flex gap-16" style={{ x: useMotionTemplate`${x}%` }}>
+      <motion.div className="inline-flex gap-16" style={{ x: useMotionTemplate`${baseX}%` }}>
         {[...Array(4)].map((_, i) => (
           <span key={i} className="text-[12vw] font-black uppercase tracking-tighter text-white/3 select-none">
             {text}
@@ -811,23 +810,22 @@ export default function App() {
               >
                 <Magnetic strength={0.15}>
                   <div className="relative w-72 h-72 md:w-100 md:h-100 group">
-                    {/* Ambient glow behind avatar */}
-                    <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 via-purple-500/10 to-cyan-500/20 rounded-full blur-[80px] group-hover:blur-[60px] transition-all duration-1000 scale-110" />
+                    {/* FIX: GPU Filter death. Swapped animating blur to animating scale/opacity */}
+                    <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 via-purple-500/10 to-cyan-500/20 rounded-full blur-[80px] transition-all duration-1000 scale-110 group-hover:scale-100 group-hover:opacity-80" />
 
-                    {/* Rotating ring */}
+                    {/* FIX: Promoted rotating rings to the GPU */}
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                      className="absolute -inset-1 rounded-full border border-white/6"
+                      className="absolute -inset-1 rounded-full border border-white/6 will-change-transform"
                     >
                       <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white/40" />
                     </motion.div>
 
-                    {/* Second ring, opposite direction */}
                     <motion.div
                       animate={{ rotate: -360 }}
                       transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                      className="absolute -inset-4 rounded-full border border-white/3"
+                      className="absolute -inset-4 rounded-full border border-white/3 will-change-transform"
                     >
                       <div className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-blue-400/40" />
                     </motion.div>
@@ -840,7 +838,7 @@ export default function App() {
                         className="relative z-10 w-full h-full object-cover
                                    grayscale-[0.3] contrast-[1.1]
                                    group-hover:grayscale-0 group-hover:contrast-100
-                                   transition-all duration-700 ease-out"
+                                   transition-all duration-700 ease-out will-change-[filter,transform]"
                       />
                       {/* Overlay gradient */}
                       <div className="absolute inset-0 z-20 bg-linear-to-t from-[#050510]/60 via-transparent to-transparent pointer-events-none" />
@@ -850,7 +848,7 @@ export default function App() {
                     <motion.div
                       animate={{ y: [-5, 5, -5] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-full bg-white/[0.07] backdrop-blur-xl border border-white/10 flex items-center gap-2"
+                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-full bg-white/[0.07] backdrop-blur-xl border border-white/10 flex items-center gap-2 will-change-transform"
                     >
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-medium whitespace-nowrap">Available for work</span>
