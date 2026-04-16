@@ -74,7 +74,12 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    cursor: none !important;
+  }
+  /* Only hide cursor on devices that have a fine pointer (mouse) */
+  @media (pointer: fine) {
+    * {
+      cursor: none !important;
+    }
   }
   body {
     background: #050510;
@@ -92,7 +97,7 @@
   }
 }
 
-/* ── Custom Cursor ── */
+/* ── Custom Cursor (only on pointer devices) ── */
 .custom-cursor {
   @apply fixed top-0 left-0 w-3 h-3 rounded-full pointer-events-none z-9999 mix-blend-difference;
   background: white;
