@@ -589,16 +589,78 @@ function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: str
   return <span ref={ref} className="tabular-nums">{count}{suffix}</span>;
 }
 
-// ─── MAIN APPLICATION ───
-export default function App() {
+// ─── OPTIMIZED COMPONENT MEMOIZATION ───
+const MemoizedBackground = React.memo(InteractiveBackground);
+const MemoizedDistortionLine = React.memo(DistortionLine);
+const MemoizedCustomCursor = React.memo(CustomCursor);
+
+// ─── ISOLATED NAVIGATION COMPONENT ───
+function Navigation() {
   const [activeSection, setActiveSection] = useState("home");
-  const [mounted, setMounted] = useState(false);
-  const { scrollY, scrollYProgress } = useScroll();
   const [navScrolled, setNavScrolled] = useState(false);
+  const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setNavScrolled(latest > 100);
   });
+
+  return (
+    <motion.nav
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
+        navScrolled ? "py-4 bg-background/50 backdrop-blur-md border-b border-white/5" : "py-8"
+      )}
+    >
+      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between">
+        <motion.div
+          className="text-sm font-mono tracking-widest text-white/60"
+          whileHover={{ color: "rgba(255,255,255,0.9)" }}
+        >
+          KS.
+        </motion.div>
+        <div className="flex items-center gap-1">
+          {["home", "projects", "skills", "contact"].map((section, i) => (
+            <Magnetic key={section} strength={0.2}>
+              <motion.button
+                initial={{ y: -30, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                onClick={() => {
+                  setActiveSection(section);
+                  document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className={cn(
+                  "px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 rounded-full relative",
+                  activeSection === section
+                    ? "text-white"
+                    : "text-white/40 hover:text-white/70"
+                )}
+              >
+                {activeSection === section && (
+                  <motion.div
+                    layoutId="navIndicator"
+                    className="absolute inset-0 bg-white/8 border border-white/12 rounded-full"
+                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  />
+                )}
+                <span className="relative z-10">{section}</span>
+              </motion.button>
+            </Magnetic>
+          ))}
+        </div>
+      </div>
+    </motion.nav>
+  );
+}
+
+
+// ─── MAIN APPLICATION ───
+export default function App() {
+  const [mounted, setMounted] = useState(false);
+  const { scrollYProgress } = useScroll();
 
   useEffect(() => {
     setMounted(true);
@@ -617,62 +679,14 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen">
-      <CustomCursor />
+      <MemoizedCustomCursor />
       <div className="grain" />
-      <InteractiveBackground />
+      <MemoizedBackground />
 
       {/* Progress Bar */}
       <motion.div className="fixed top-0 left-0 right-0 h-0.5 bg-white/80 z-100 origin-left" style={{ scaleX }} />
 
-      {/* Navigation */}
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
-          navScrolled ? "py-4" : "py-8"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-8 flex items-center justify-between">
-          <motion.div
-            className="text-sm font-mono tracking-widest text-white/60"
-            whileHover={{ color: "rgba(255,255,255,0.9)" }}
-          >
-            KS.
-          </motion.div>
-          <div className="flex items-center gap-1">
-            {["home", "projects", "skills", "contact"].map((section, i) => (
-              <Magnetic key={section} strength={0.2}>
-                <motion.button
-                  initial={{ y: -30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  onClick={() => {
-                    setActiveSection(section);
-                    document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className={cn(
-                    "px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 rounded-full relative",
-                    activeSection === section
-                      ? "text-white"
-                      : "text-white/40 hover:text-white/70"
-                  )}
-                >
-                  {activeSection === section && (
-                    <motion.div
-                      layoutId="navIndicator"
-                      className="absolute inset-0 bg-white/8 border border-white/12 rounded-full"
-                      transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    />
-                  )}
-                  <span className="relative z-10">{section}</span>
-                </motion.button>
-              </Magnetic>
-            ))}
-          </div>
-        </div>
-      </motion.nav>
+      <Navigation />
 
       <main>
         {/* ════════ HERO ════════ */}
@@ -958,7 +972,7 @@ export default function App() {
           </motion.div>
         </section>
 
-        <DistortionLine />
+        <MemoizedDistortionLine />
 
         {/* ════════ PROJECTS ════════ */}
         <section id="projects" className="py-40 max-w-7xl mx-auto px-8">
@@ -1052,7 +1066,7 @@ export default function App() {
           </div>
         </section>
 
-        <DistortionLine />
+        <MemoizedDistortionLine />
 
         {/* ════════ SKILLS ════════ */}
         <section id="skills" className="py-40 max-w-7xl mx-auto px-8">
@@ -1124,7 +1138,7 @@ export default function App() {
           </div>
         </section>
 
-        <DistortionLine />
+        <MemoizedDistortionLine />
 
         {/* ════════ CONTACT ════════ */}
         <section id="contact" className="py-40 max-w-7xl mx-auto px-8">
