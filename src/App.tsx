@@ -97,7 +97,7 @@ const USER_DATA = {
       title: "NotaLink",
       desc: "A web-based academic note-sharing portal featuring REST API endpoints for secure file management and subject-based categorization.",
       tech: ["Flask", "SQLite", "JavaScript", "REST"],
-      link: "https://github.com/kartikey-singh",
+      link: "https://github.com/kartikey-x/NotaLink",
       featured: true,
       year: "2025",
       number: "01"
@@ -106,7 +106,7 @@ const USER_DATA = {
       title: "StegoSafe",
       desc: "An advanced information-hiding tool utilizing LSB steganography to securely embed and extract data within image payloads.",
       tech: ["Python", "Steganography", "Security"],
-      link: "https://github.com/kartikey-singh",
+      link: "https://github.com/kartikey-x/StegoSafe-OpenInnovation",
       year: "2026",
       number: "02"
     },
@@ -114,7 +114,7 @@ const USER_DATA = {
       title: "ExamPrepBuddy",
       desc: "A modular CLI-based study optimization tool that automates plan organization and tracks completion metrics across multiple subjects.",
       tech: ["Python", "File I/O", "Modular Design"],
-      link: "https://github.com/kartikey-singh",
+      link: "https://github.com/kartikey-x/ExamPreparationBuddy",
       year: "2025",
       number: "03"
     }
