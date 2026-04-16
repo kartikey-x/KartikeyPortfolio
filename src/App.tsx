@@ -55,7 +55,7 @@ const USER_DATA = {
       tech: ["Flask", "SQLite", "JavaScript", "REST"],
       link: "https://github.com/kartikey-singh",
       featured: true,
-      year: "2024",
+      year: "2025",
       number: "01"
     },
     {
@@ -63,7 +63,7 @@ const USER_DATA = {
       desc: "An advanced information-hiding tool utilizing LSB steganography to securely embed and extract data within image payloads.",
       tech: ["Python", "Steganography", "Security"],
       link: "https://github.com/kartikey-singh",
-      year: "2024",
+      year: "2026",
       number: "02"
     },
     {
@@ -71,7 +71,7 @@ const USER_DATA = {
       desc: "A modular CLI-based study optimization tool that automates plan organization and tracks completion metrics across multiple subjects.",
       tech: ["Python", "File I/O", "Modular Design"],
       link: "https://github.com/kartikey-singh",
-      year: "2023",
+      year: "2025",
       number: "03"
     }
   ],
