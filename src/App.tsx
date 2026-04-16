@@ -701,7 +701,7 @@ export default function App() {
                     style={{ transformOrigin: "left" }}
                   />
                   <span className="text-[11px] uppercase tracking-[0.5em] text-white/50 font-medium">
-                    Portfolio / 2024
+                    Portfolio / 2026
                   </span>
                 </motion.div>
 
