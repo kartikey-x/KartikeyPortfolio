@@ -482,7 +482,6 @@ function InteractiveBackground() {
 }
 
 // ─── SCROLL VELOCITY TEXT ───
-// FIX: Removed the massive CPU leak caused by passing a continuous loop into a physics spring.
 // ─── SCROLL VELOCITY TEXT ───
 function ScrollVelocityText({ text, className }: { text: string; className?: string }) {
   const { scrollY } = useScroll();
@@ -501,8 +500,8 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
   useEffect(() => {
     let raf: number;
     const animate = () => {
-      // Base movement speed + scroll velocity
-      let moveBy = direction.current * Math.max(0.5, velocity.current * 0.1);
+      // FIX: Dropped base speed from 0.5 to 0.15. Dampened scroll multiplier to 0.05.
+      let moveBy = direction.current * Math.max(0.15, velocity.current * 0.05);
       let currentX = baseX.get() + moveBy;
 
       // The true infinite loop math. Wrap seamlessly at exactly -50%.
@@ -522,9 +521,7 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
 
   return (
     <div className={cn("overflow-hidden whitespace-nowrap flex", className)}>
-      {/* Added pr-16 (padding-right) to match gap-16. This ensures the total width is perfectly divisible by 2 for the loop reset. */}
       <motion.div className="flex gap-16 pr-16 will-change-transform" style={{ x: useMotionTemplate`${baseX}%` }}>
-        {/* We doubled the array to 8 items so 50% width is a perfect duplicate */}
         {[...Array(8)].map((_, i) => (
           <span key={i} className="text-[12vw] font-black uppercase tracking-tighter text-white/3 select-none">
             {text}
