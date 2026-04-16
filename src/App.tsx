@@ -40,14 +40,57 @@ const USER_DATA = {
     specs: "Optimized for AI/ML Workloads",
     description: "Configured for local model training, data analysis using NumPy/Pandas, and full-stack backend development."
   },
-  skills: 
-  [
-    { name: "Machine Learning", icon: <Cpu className="w-5 h-5" />, level: "Specialist", desc: "Neural networks, NLP, computer vision" },
-    { name: "Backend Architecture", icon: <Terminal className="w-5 h-5" />, level: "Expert", desc: "Flask, REST APIs, microservices" },
-    { name: "Full-Stack Dev", icon: <Code2 className="w-5 h-5" />, level: "Proficient", desc: "React, TypeScript, Node.js" },
-    { name: "Network Engineering", icon: <Network className="w-5 h-5" />, level: "Certified", desc: "TCP/IP, security, infrastructure" },
-    { name: "Data Engineering", icon: <Database className="w-5 h-5" />, level: "Advanced", desc: "SQL, NoSQL, ETL pipelines" },
-    { name: "Systems Design", icon: <Braces className="w-5 h-5" />, level: "Proficient", desc: "Scalable architecture patterns" },
+  skillCategories: [
+    {
+      category: "Languages",
+      icon: <Code2 className="w-5 h-5" />,
+      color: "from-blue-500/20 to-blue-600/5",
+      accent: "bg-blue-400/80",
+      items: ["Python", "C", "C++", "Java"],
+    },
+    {
+      category: "Core CS",
+      icon: <Cpu className="w-5 h-5" />,
+      color: "from-purple-500/20 to-purple-600/5",
+      accent: "bg-purple-400/80",
+      items: ["Data Structures & Algorithms", "Object-Oriented Programming", "DBMS", "Operating Systems"],
+    },
+    {
+      category: "Tools & Platforms",
+      icon: <Terminal className="w-5 h-5" />,
+      color: "from-cyan-500/20 to-cyan-600/5",
+      accent: "bg-cyan-400/80",
+      items: ["Git", "GitHub", "VS Code", "Google Colab"],
+    },
+    {
+      category: "Web & Backend",
+      icon: <Globe className="w-5 h-5" />,
+      color: "from-emerald-500/20 to-emerald-600/5",
+      accent: "bg-emerald-400/80",
+      items: ["HTML", "CSS", "Backend Basics", "REST APIs"],
+    },
+    {
+      category: "AI / ML Track",
+      icon: <Sparkles className="w-5 h-5" />,
+      color: "from-orange-500/20 to-orange-600/5",
+      accent: "bg-orange-400/80",
+      items: ["Machine Learning", "Neural Networks", "NLP", "Computer Vision"],
+    },
+    {
+      category: "Networking",
+      icon: <Network className="w-5 h-5" />,
+      color: "from-rose-500/20 to-rose-600/5",
+      accent: "bg-rose-400/80",
+      items: ["Network Protocols", "Configuration", "Troubleshooting", "Technical Documentation"],
+    },
+  ],
+  skills: [
+    { name: "Python", icon: <Code2 className="w-5 h-5" />, level: "Primary", desc: "Core language for AI/ML & scripting" },
+    { name: "C / C++", icon: <Terminal className="w-5 h-5" />, level: "Proficient", desc: "Systems & competitive programming" },
+    { name: "Java", icon: <Braces className="w-5 h-5" />, level: "Proficient", desc: "OOP and academic coursework" },
+    { name: "DSA & OOP", icon: <Cpu className="w-5 h-5" />, level: "Strong", desc: "80+ problems on LeetCode & HackerRank" },
+    { name: "Git & GitHub", icon: <Network className="w-5 h-5" />, level: "Daily Use", desc: "Version control & open-source" },
+    { name: "AI / ML", icon: <Sparkles className="w-5 h-5" />, level: "Specialising", desc: "B.Tech AI/ML track, Google Colab" },
   ],
   projects: [
     {
@@ -80,7 +123,19 @@ const USER_DATA = {
     email: "kartikeysingh2007@gmail.com",
     socials: [
       { name: "GitHub", icon: <Github className="w-5 h-5" />, link: "https://github.com/kartikey-singh" },
-      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://linkedin.com/in/kartikey-singh" }
+      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://linkedin.com/in/kartikey-singh" },
+      { name: "Instagram", icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <circle cx="12" cy="12" r="4"/>
+          <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/>
+        </svg>
+      ), link: "https://instagram.com/unclaimedheat" },
+      { name: "Twitter", icon: (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      ), link: "https://twitter.com/@kartikey_x_" },
     ]
   }
 };
@@ -1077,72 +1132,100 @@ export default function App() {
 
         {/* ════════ SKILLS ════════ */}
         <section id="skills" className="py-40 max-w-7xl mx-auto px-8">
-          <div className="grid lg:grid-cols-[0.4fr_0.6fr] gap-20">
-            <div>
-              <MaskReveal>
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">03</span>
-                  <div className="w-8 h-px bg-white/20" />
-                  <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Expertise</span>
-                </div>
-              </MaskReveal>
-
-              <SplitText className="text-5xl font-bold tracking-[-0.03em] text-white leading-[1.1] mb-8">
+          {/* Header */}
+          <div className="mb-20">
+            <MaskReveal>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">03</span>
+                <div className="w-8 h-px bg-white/20" />
+                <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Expertise</span>
+              </div>
+            </MaskReveal>
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+              <SplitText className="text-5xl font-bold tracking-[-0.03em] text-white leading-[1.1]">
                 Technical Stack
               </SplitText>
-
               <motion.p
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="text-white/30 text-lg leading-relaxed font-light"
+                transition={{ delay: 0.4 }}
+                className="text-white/30 text-base leading-relaxed font-light max-w-sm lg:text-right"
               >
-                Bridging the gap between high-level abstraction and low-level optimization.
+                B.Tech CSE · AI/ML Track · SRM Institute of Science and Technology
               </motion.p>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {USER_DATA.skills.map((skill, idx) => (
-                <motion.div
-                  key={skill.name}
-                  initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: 0.6,
-                    delay: idx * 0.08,
-                    ease: [0.16, 1, 0.3, 1]
-                  }}
-                  whileHover={{ y: -4, transition: { duration: 0.25 } }}
-                  className="group relative p-6 rounded-xl border border-white/5 bg-white/1.5 hover:bg-white/4 hover:border-white/10 transition-all duration-500 overflow-hidden"
-                >
-                  {/* Hover gradient overlay */}
-                  <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-4">
-                      <motion.div
-                        whileHover={{ scale: 1.15, rotate: 10 }}
-                        className="p-3 rounded-lg bg-white/5 text-white/50 group-hover:text-white/80 group-hover:bg-white/10 transition-all duration-300"
-                      >
-                        {skill.icon}
-                      </motion.div>
-                      <span className="text-[9px] uppercase tracking-[0.3em] text-white/20 font-mono group-hover:text-white/40 transition-colors">
-                        {skill.level}
-                      </span>
-                    </div>
-                    <h4 className="text-base font-semibold text-white/70 group-hover:text-white transition-colors duration-300 mb-1">
-                      {skill.name}
-                    </h4>
-                    <p className="text-[12px] text-white/20 group-hover:text-white/35 transition-colors duration-300">
-                      {skill.desc}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
           </div>
+
+          {/* Category Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {USER_DATA.skillCategories.map((cat, idx) => (
+              <motion.div
+                key={cat.category}
+                initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.65, delay: idx * 0.09, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                className={`group relative rounded-2xl border border-white/6 bg-linear-to-br ${cat.color} backdrop-blur-sm overflow-hidden p-6 hover:border-white/14 transition-all duration-500`}
+              >
+                {/* Subtle noise texture overlay */}
+                <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,white,transparent_70%)]" />
+
+                <div className="relative z-10">
+                  {/* Category Header */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="p-2.5 rounded-lg bg-white/8 text-white/60 group-hover:text-white/90 group-hover:bg-white/12 transition-all duration-300">
+                      {cat.icon}
+                    </div>
+                    <span className="text-[11px] uppercase tracking-[0.3em] text-white/35 font-mono group-hover:text-white/55 transition-colors">
+                      {cat.category}
+                    </span>
+                  </div>
+
+                  {/* Accent line */}
+                  <div className={`h-px w-8 ${cat.accent} opacity-40 group-hover:opacity-70 group-hover:w-14 transition-all duration-500 mb-5`} />
+
+                  {/* Tech Pills */}
+                  <div className="flex flex-wrap gap-2">
+                    {cat.items.map((item, i) => (
+                      <motion.span
+                        key={item}
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.09 + i * 0.05 + 0.2 }}
+                        className="text-[11px] px-3 py-1.5 rounded-full border border-white/8 text-white/40 bg-white/3 group-hover:border-white/16 group-hover:text-white/65 group-hover:bg-white/6 transition-all duration-300"
+                      >
+                        {item}
+                      </motion.span>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom stat bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+            className="mt-14 flex flex-wrap gap-8 items-center border-t border-white/5 pt-10"
+          >
+            {[
+              { label: "LeetCode & HackerRank", value: "80+" },
+              { label: "Problems Solved", value: "Algo" },
+              { label: "Specialisation", value: "AI / ML" },
+              { label: "Year", value: "2nd" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex flex-col gap-1">
+                <span className="text-2xl font-bold text-white/70 tracking-tight">{stat.value}</span>
+                <span className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-mono">{stat.label}</span>
+              </div>
+            ))}
+          </motion.div>
         </section>
 
         <MemoizedDistortionLine />
