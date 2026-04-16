@@ -499,9 +499,8 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
   useEffect(() => {
     let raf: number;
     const animate = () => {
-      // FIX: Reduced base speed from 0.5 to 0.15 (30%)
-      // FIX: Reduced scroll multiplier from 0.1 to 0.03 (30%)
-      let moveBy = direction.current * Math.max(0.15, velocity.current * 0.03);
+
+      let moveBy = direction.current * Math.max(0.05, velocity.current * 0.01);
       let currentX = baseX.get() + moveBy;
 
       // The true infinite loop math. Wrap seamlessly at exactly -50%.
