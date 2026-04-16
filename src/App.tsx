@@ -500,7 +500,7 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
     let raf: number;
     const animate = () => {
 
-      let moveBy = direction.current * Math.max(0.038, velocity.current * 0.006);
+      let moveBy = direction.current * Math.max(0.045, velocity.current * 0.02);
       let currentX = baseX.get() + moveBy;
 
       // The true infinite loop math. Wrap seamlessly at exactly -50%.
