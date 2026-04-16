@@ -24,10 +24,25 @@ import {
   Braces,
   Database,
   Network,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent } from "@/src/components/ui/card";
+
+// ─── TOUCH DEVICE DETECTION ───
+function useIsTouchDevice() {
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    setIsTouch(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsTouch(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isTouch;
+}
 
 // ─── USER DATA ───
 const USER_DATA = {
@@ -140,7 +155,7 @@ const USER_DATA = {
   }
 };
 
-// ─── CUSTOM CURSOR ───
+// ─── CUSTOM CURSOR (only rendered on non-touch devices) ───
 function CustomCursor() {
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -154,8 +169,6 @@ function CustomCursor() {
   const fy = useSpring(followerY, { damping: 18, stiffness: 100 });
 
   useEffect(() => {
-    // We track state locally in the loop to prevent React from re-rendering
-    // hundreds of times when mousing over deeply nested SVG/Div elements.
     let currentHoverState = false;
 
     const moveCursor = (e: MouseEvent) => {
@@ -198,16 +211,17 @@ function CustomCursor() {
   );
 }
 
-// ─── MAGNETIC WRAPPER ───
+// ─── MAGNETIC WRAPPER (disabled on touch) ───
 function Magnetic({ children, className, strength = 0.35 }: { children: React.ReactNode; className?: string; strength?: number }) {
   const ref = useRef<HTMLDivElement>(null);
+  const isTouch = useIsTouchDevice();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const springX = useSpring(x, { damping: 30, stiffness: 150 });
   const springY = useSpring(y, { damping: 30, stiffness: 150 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
+    if (isTouch || !ref.current) return;
     const { clientX, clientY } = e;
     const { left, top, width, height } = ref.current.getBoundingClientRect();
     x.set((clientX - left - width / 2) * strength);
@@ -215,6 +229,10 @@ function Magnetic({ children, className, strength = 0.35 }: { children: React.Re
   };
 
   const handleMouseLeave = () => { x.set(0); y.set(0); };
+
+  if (isTouch) {
+    return <div className={cn("magnetic-area", className)}>{children}</div>;
+  }
 
   return (
     <motion.div ref={ref} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
@@ -297,19 +315,21 @@ function LineReveal({ className, delay = 0 }: { className?: string; delay?: numb
   );
 }
 
-// ─── PARALLAX SECTION ───
+// ─── PARALLAX SECTION (reduced on mobile) ───
 function ParallaxSection({ children, speed = 0.5, className }: { children: React.ReactNode; speed?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const isTouch = useIsTouchDevice();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
   });
-  const y = useTransform(scrollYProgress, [0, 1], [100 * speed, -100 * speed]);
+  const effectiveSpeed = isTouch ? speed * 0.3 : speed;
+  const y = useTransform(scrollYProgress, [0, 1], [100 * effectiveSpeed, -100 * effectiveSpeed]);
   const smoothY = useSpring(y, { damping: 50, stiffness: 100 });
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      <motion.div style={{ y: smoothY }}>
+      <motion.div style={{ y: isTouch ? 0 : smoothY }}>
         {children}
       </motion.div>
     </div>
@@ -343,7 +363,7 @@ function GlitchText({ children, className }: { children: string; className?: str
   );
 }
 
-// ─── INTERACTIVE PARTICLE BACKGROUND ───
+// ─── INTERACTIVE PARTICLE BACKGROUND (reduced on mobile) ───
 interface Particle {
   x: number; y: number; vx: number; vy: number;
   size: number; alpha: number; color: string;
@@ -373,6 +393,9 @@ function InteractiveBackground() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d", { alpha: true })!;
 
+    // Detect if touch/mobile for reduced complexity
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
     const orbColors = [
       "120, 200, 255",
       "80, 140, 255",
@@ -391,7 +414,7 @@ function InteractiveBackground() {
     let height = window.innerHeight;
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio, 2);
+      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width * dpr;
@@ -404,9 +427,10 @@ function InteractiveBackground() {
 
     const createOrbs = (): Orb[] => {
       const orbs: Orb[] = [];
-      const count = Math.min(12, Math.floor((width * height) / 100000));
+      const maxCount = isMobile ? 5 : 12;
+      const count = Math.min(maxCount, Math.floor((width * height) / 100000));
       for (let i = 0; i < count; i++) {
-        const baseRadius = 100 + Math.random() * 250;
+        const baseRadius = isMobile ? (80 + Math.random() * 150) : (100 + Math.random() * 250);
         orbs.push({
           x: Math.random() * width, y: Math.random() * height,
           baseX: Math.random() * width, baseY: Math.random() * height,
@@ -423,7 +447,8 @@ function InteractiveBackground() {
     };
 
     const createParticles = () => {
-      for (let i = 0; i < 40; i++) {
+      const particleCount = isMobile ? 15 : 40;
+      for (let i = 0; i < particleCount; i++) {
         particlesRef.current.push({
           x: Math.random() * width,
           y: Math.random() * height,
@@ -445,6 +470,14 @@ function InteractiveBackground() {
     const onMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        mouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+    const onTouchEnd = () => {
+      mouseRef.current = { x: -1000, y: -1000 };
+    };
     const onScroll = () => { scrollRef.current = window.scrollY; };
 
     const animate = () => {
@@ -461,16 +494,18 @@ function InteractiveBackground() {
         let targetY = orb.baseY + driftY - scrollOffset % (height * 2);
         if (targetY < -orb.radius * 2) targetY += height + orb.radius * 4;
 
-        const dx = mouse.x - orb.x;
-        const dy = mouse.y - orb.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 500 && dist > 0) {
-          const force = (1 - dist / 500) * 40;
-          targetX += (dx / dist) * force;
-          targetY += (dy / dist) * force;
-          orb.alpha = orb.baseAlpha + (1 - dist / 500) * 0.03;
-        } else {
-          orb.alpha += (orb.baseAlpha - orb.alpha) * 0.01;
+        if (!isMobile) {
+          const dx = mouse.x - orb.x;
+          const dy = mouse.y - orb.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 500 && dist > 0) {
+            const force = (1 - dist / 500) * 40;
+            targetX += (dx / dist) * force;
+            targetY += (dy / dist) * force;
+            orb.alpha = orb.baseAlpha + (1 - dist / 500) * 0.03;
+          } else {
+            orb.alpha += (orb.baseAlpha - orb.alpha) * 0.01;
+          }
         }
 
         const pulse = Math.sin(t * orb.pulseSpeed + orb.pulsePhase) * 0.1 + 1;
@@ -509,7 +544,7 @@ function InteractiveBackground() {
         ctx.fill();
       }
 
-      if (mouse.x > 0) {
+      if (!isMobile && mouse.x > 0) {
         const glow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 250);
         glow.addColorStop(0, `rgba(120, 180, 255, 0.025)`);
         glow.addColorStop(1, `rgba(0, 0, 0, 0)`);
@@ -521,6 +556,8 @@ function InteractiveBackground() {
     };
 
     window.addEventListener("mousemove", onMouseMove, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
     const onResize = () => { resize(); orbsRef.current = createOrbs(); };
     window.addEventListener("resize", onResize);
@@ -529,6 +566,8 @@ function InteractiveBackground() {
     return () => {
       cancelAnimationFrame(animationRef.current);
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
     };
@@ -555,11 +594,9 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
   useEffect(() => {
     let raf: number;
     const animate = () => {
-
       let moveBy = direction.current * Math.max(0.045, velocity.current * 0.02);
       let currentX = baseX.get() + moveBy;
 
-      // The true infinite loop math. Wrap seamlessly at exactly -50%.
       if (currentX <= -50) {
         currentX += 50;
       } else if (currentX >= 0) {
@@ -567,7 +604,7 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
       }
 
       baseX.set(currentX);
-      velocity.current *= 0.95; // Decay scroll velocity
+      velocity.current *= 0.95;
       raf = requestAnimationFrame(animate);
     };
     raf = requestAnimationFrame(animate);
@@ -576,9 +613,9 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
 
   return (
     <div className={cn("overflow-hidden whitespace-nowrap flex", className)}>
-      <motion.div className="flex gap-16 pr-16 will-change-transform" style={{ x: useMotionTemplate`${baseX}%` }}>
+      <motion.div className="flex gap-8 md:gap-16 pr-8 md:pr-16 will-change-transform" style={{ x: useMotionTemplate`${baseX}%` }}>
         {[...Array(8)].map((_, i) => (
-          <span key={i} className="text-[12vw] font-black uppercase tracking-tighter text-white/3 select-none">
+          <span key={i} className="text-[14vw] md:text-[12vw] font-black uppercase tracking-tighter text-white/3 select-none">
             {text}
           </span>
         ))}
@@ -657,65 +694,143 @@ const MemoizedBackground = React.memo(InteractiveBackground);
 const MemoizedDistortionLine = React.memo(DistortionLine);
 const MemoizedCustomCursor = React.memo(CustomCursor);
 
+// ─── MOBILE NAVIGATION MENU ───
+function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col items-center justify-center"
+        >
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            onClick={onClose}
+            className="absolute top-6 right-6 p-3 text-white/60 hover:text-white"
+            aria-label="Close menu"
+          >
+            <X className="w-6 h-6" />
+          </motion.button>
+
+          <nav className="flex flex-col items-center gap-2">
+            {["home", "projects", "skills", "contact"].map((section, i) => (
+              <motion.button
+                key={section}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ delay: 0.1 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                onClick={() => {
+                  onClose();
+                  setTimeout(() => {
+                    document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
+                  }, 300);
+                }}
+                className="text-3xl font-bold uppercase tracking-[0.15em] text-white/70 hover:text-white py-4 px-8 transition-colors"
+              >
+                {section}
+              </motion.button>
+            ))}
+          </nav>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // ─── ISOLATED NAVIGATION COMPONENT ───
 function Navigation() {
   const [activeSection, setActiveSection] = useState("home");
   const [navScrolled, setNavScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setNavScrolled(latest > 100);
   });
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
+
   return (
-    <motion.nav
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
-        navScrolled ? "py-4 bg-background/50 backdrop-blur-md border-b border-white/5" : "py-8"
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between">
-        <motion.div
-          className="text-sm font-mono tracking-widest text-white/60"
-          whileHover={{ color: "rgba(255,255,255,0.9)" }}
-        >
-          KS.
-        </motion.div>
-        <div className="flex items-center gap-1">
-          {["home", "projects", "skills", "contact"].map((section, i) => (
-            <Magnetic key={section} strength={0.2}>
-              <motion.button
-                initial={{ y: -30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.6 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                onClick={() => {
-                  setActiveSection(section);
-                  document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={cn(
-                  "px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 rounded-full relative",
-                  activeSection === section
-                    ? "text-white"
-                    : "text-white/40 hover:text-white/70"
-                )}
-              >
-                {activeSection === section && (
-                  <motion.div
-                    layoutId="navIndicator"
-                    className="absolute inset-0 bg-white/8 border border-white/12 rounded-full"
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                  />
-                )}
-                <span className="relative z-10">{section}</span>
-              </motion.button>
-            </Magnetic>
-          ))}
+    <>
+      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+
+      <motion.nav
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className={cn(
+          "fixed top-0 left-0 right-0 z-40 transition-all duration-700",
+          navScrolled ? "py-3 md:py-4 bg-background/50 backdrop-blur-md border-b border-white/5" : "py-5 md:py-8"
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between">
+          <motion.div
+            className="text-sm font-mono tracking-widest text-white/60"
+            whileHover={{ color: "rgba(255,255,255,0.9)" }}
+          >
+            KS.
+          </motion.div>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-1">
+            {["home", "projects", "skills", "contact"].map((section, i) => (
+              <Magnetic key={section} strength={0.2}>
+                <motion.button
+                  initial={{ y: -30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.6 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  onClick={() => {
+                    setActiveSection(section);
+                    document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={cn(
+                    "px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 rounded-full relative",
+                    activeSection === section
+                      ? "text-white"
+                      : "text-white/40 hover:text-white/70"
+                  )}
+                >
+                  {activeSection === section && (
+                    <motion.div
+                      layoutId="navIndicator"
+                      className="absolute inset-0 bg-white/8 border border-white/12 rounded-full"
+                      transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                    />
+                  )}
+                  <span className="relative z-10">{section}</span>
+                </motion.button>
+              </Magnetic>
+            ))}
+          </div>
+
+          {/* Mobile hamburger */}
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            onClick={() => setMobileMenuOpen(true)}
+            className="md:hidden p-2 text-white/60 hover:text-white"
+            aria-label="Open menu"
+          >
+            <Menu className="w-6 h-6" />
+          </motion.button>
         </div>
-      </div>
-    </motion.nav>
+      </motion.nav>
+    </>
   );
 }
 
@@ -723,6 +838,7 @@ function Navigation() {
 // ─── MAIN APPLICATION ───
 export default function App() {
   const [mounted, setMounted] = useState(false);
+  const isTouch = useIsTouchDevice();
   const { scrollYProgress } = useScroll();
 
   useEffect(() => {
@@ -740,9 +856,21 @@ export default function App() {
 
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
+  // Add viewport meta tag for proper mobile rendering
+  useEffect(() => {
+    const existing = document.querySelector('meta[name="viewport"]');
+    if (!existing) {
+      const meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, initial-scale=1.0, viewport-fit=cover';
+      document.head.appendChild(meta);
+    }
+  }, []);
+
   return (
-    <div className="relative min-h-screen">
-      <MemoizedCustomCursor />
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Only render custom cursor on non-touch devices */}
+      {!isTouch && <MemoizedCustomCursor />}
       <div className="grain" />
       <MemoizedBackground />
 
@@ -756,34 +884,34 @@ export default function App() {
         <motion.section
           ref={heroRef}
           id="home"
-          style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+          style={isTouch ? { opacity: heroOpacity } : { y: heroY, opacity: heroOpacity, scale: heroScale }}
           className="relative min-h-screen flex items-center justify-center overflow-hidden"
         >
-          <div className="max-w-7xl mx-auto px-8 w-full pt-32 pb-32">
-            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-16 items-center">
+          <div className="max-w-7xl mx-auto px-5 md:px-8 w-full pt-28 md:pt-32 pb-24 md:pb-32">
+            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
               {/* Left: Text Content */}
-              <div className="relative z-10">
+              <div className="relative z-10 order-2 lg:order-1">
                 {/* Top label */}
                 <motion.div
                   initial={{ opacity: 0, x: -30 }}
                   animate={mounted ? { opacity: 1, x: 0 } : {}}
                   transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center gap-4 mb-12"
+                  className="flex items-center gap-4 mb-8 md:mb-12"
                 >
                   <motion.div
-                    className="w-12 h-px bg-white/30"
+                    className="w-8 md:w-12 h-px bg-white/30"
                     initial={{ scaleX: 0 }}
                     animate={mounted ? { scaleX: 1 } : {}}
                     transition={{ duration: 1, delay: 0.5 }}
                     style={{ transformOrigin: "left" }}
                   />
-                  <span className="text-[11px] uppercase tracking-[0.5em] text-white/50 font-medium">
+                  <span className="text-[10px] md:text-[11px] uppercase tracking-[0.4em] md:tracking-[0.5em] text-white/50 font-medium">
                     Portfolio / 2026
                   </span>
                 </motion.div>
 
                 {/* Name */}
-                <div className="mb-8">
+                <div className="mb-6 md:mb-8">
                   {USER_DATA.name.split(" ").map((word, i) => (
                     <div key={i} className="overflow-hidden">
                       <motion.h1
@@ -794,7 +922,7 @@ export default function App() {
                           delay: 0.4 + i * 0.12,
                           ease: [0.16, 1, 0.3, 1]
                         }}
-                        className="text-[clamp(3.5rem,8vw,8rem)] font-bold leading-[0.9] tracking-[-0.04em] text-white"
+                        className="text-[clamp(2.5rem,10vw,8rem)] font-bold leading-[0.9] tracking-[-0.04em] text-white"
                       >
                         {word}
                       </motion.h1>
@@ -807,10 +935,10 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.8, delay: 0.8 }}
-                  className="flex items-center gap-4 mb-10"
+                  className="flex items-center gap-3 md:gap-4 mb-8 md:mb-10"
                 >
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[13px] uppercase tracking-[0.3em] text-white/50 font-medium">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="text-[11px] md:text-[13px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/50 font-medium">
                     {USER_DATA.role}
                   </span>
                 </motion.div>
@@ -820,7 +948,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.8, delay: 1 }}
-                  className="text-lg text-white/40 leading-relaxed max-w-lg mb-14 font-light"
+                  className="text-base md:text-lg text-white/40 leading-relaxed max-w-lg mb-10 md:mb-14 font-light"
                 >
                   {USER_DATA.bio}
                 </motion.p>
@@ -830,14 +958,14 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={mounted ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.8, delay: 1.2 }}
-                  className="flex flex-wrap gap-5"
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-5"
                 >
                   <Magnetic>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-                      className="group relative px-10 py-4 bg-white text-black text-[12px] uppercase tracking-[0.3em] font-semibold rounded-full overflow-hidden"
+                      className="group relative px-8 md:px-10 py-4 bg-white text-black text-[12px] uppercase tracking-[0.3em] font-semibold rounded-full overflow-hidden text-center"
                     >
                       <motion.div
                         className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500"
@@ -845,7 +973,7 @@ export default function App() {
                         whileHover={{ x: 0 }}
                         transition={{ duration: 0.4 }}
                       />
-                      <span className="relative z-10 flex items-center gap-3 group-hover:text-white transition-colors">
+                      <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-white transition-colors">
                         Explore Work
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </span>
@@ -857,7 +985,7 @@ export default function App() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-                      className="px-10 py-4 border border-white/15 text-white/70 hover:text-white hover:border-white/30 text-[12px] uppercase tracking-[0.3em] font-medium rounded-full transition-all duration-300"
+                      className="px-8 md:px-10 py-4 border border-white/15 text-white/70 hover:text-white hover:border-white/30 text-[12px] uppercase tracking-[0.3em] font-medium rounded-full transition-all duration-300 text-center"
                     >
                       Get in Touch
                     </motion.button>
@@ -870,14 +998,12 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.8, filter: "blur(20px)" }}
                 animate={mounted ? { opacity: 1, scale: 1, filter: "blur(0px)" } : {}}
                 transition={{ duration: 1.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="relative flex justify-center items-center"
+                className="relative flex justify-center items-center order-1 lg:order-2"
               >
                 <Magnetic strength={0.15}>
-                  <div className="relative w-72 h-72 md:w-100 md:h-100 group">
-                    {/* FIX: GPU Filter death. Swapped animating blur to animating scale/opacity */}
-                    <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 via-purple-500/10 to-cyan-500/20 rounded-full blur-[80px] transition-all duration-1000 scale-110 group-hover:scale-100 group-hover:opacity-80" />
+                  <div className="relative w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 lg:w-100 lg:h-100 group">
+                    <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 via-purple-500/10 to-cyan-500/20 rounded-full blur-[60px] md:blur-[80px] transition-all duration-1000 scale-110 group-hover:scale-100 group-hover:opacity-80" />
 
-                    {/* FIX: Promoted rotating rings to the GPU */}
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -889,7 +1015,7 @@ export default function App() {
                     <motion.div
                       animate={{ rotate: -360 }}
                       transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                      className="absolute -inset-4 rounded-full border border-white/3 will-change-transform"
+                      className="absolute -inset-4 rounded-full border border-white/3 will-change-transform hidden sm:block"
                     >
                       <div className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-blue-400/40" />
                     </motion.div>
@@ -904,7 +1030,6 @@ export default function App() {
                                    group-hover:grayscale-0 group-hover:contrast-100
                                    transition-all duration-700 ease-out will-change-[filter,transform]"
                       />
-                      {/* Overlay gradient */}
                       <div className="absolute inset-0 z-20 bg-linear-to-t from-[#050510]/60 via-transparent to-transparent pointer-events-none" />
                     </div>
 
@@ -912,10 +1037,10 @@ export default function App() {
                     <motion.div
                       animate={{ y: [-5, 5, -5] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-full bg-white/[0.07] backdrop-blur-xl border border-white/10 flex items-center gap-2 will-change-transform"
+                      className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-30 px-4 md:px-5 py-2 rounded-full bg-white/[0.07] backdrop-blur-xl border border-white/10 flex items-center gap-2 will-change-transform"
                     >
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 font-medium whitespace-nowrap">Available for work</span>
+                      <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/60 font-medium whitespace-nowrap">Available for work</span>
                     </motion.div>
                   </div>
                 </Magnetic>
@@ -927,7 +1052,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={mounted ? { opacity: 1 } : {}}
               transition={{ delay: 2 }}
-              className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
+              className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex-col items-center gap-3 hidden md:flex"
             >
               <span className="text-[10px] uppercase tracking-[0.4em] text-white/25">Scroll</span>
               <motion.div
@@ -940,13 +1065,13 @@ export default function App() {
         </motion.section>
 
         {/* ════════ SCROLL VELOCITY MARQUEE ════════ */}
-        <div className="py-8 overflow-hidden">
+        <div className="py-4 md:py-8 overflow-hidden">
           <ScrollVelocityText text="AI/ML · Full-Stack · Python · Architecture" />
         </div>
 
         {/* ════════ ABOUT / HARDWARE ════════ */}
-        <section className="py-40 max-w-7xl mx-auto px-8">
-          <div className="grid lg:grid-cols-2 gap-20 items-start">
+        <section className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
             <div>
               <MaskReveal>
                 <div className="flex items-center gap-4 mb-8">
@@ -956,7 +1081,7 @@ export default function App() {
                 </div>
               </MaskReveal>
 
-              <SplitText className="text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.15] mb-8">
+              <SplitText className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.15] mb-8">
                 Engineered for raw computational performance
               </SplitText>
 
@@ -965,7 +1090,7 @@ export default function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="text-white/35 text-lg leading-relaxed font-light"
+                className="text-white/35 text-base md:text-lg leading-relaxed font-light"
               >
                 My workflow is built around efficiency and raw computational power.
                 I believe that the tools we use define the boundaries of what we can create.
@@ -979,28 +1104,28 @@ export default function App() {
                 viewport={{ once: true }}
                 transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -5, transition: { duration: 0.3 } }}
-                className="relative p-10 rounded-2xl border border-white/6 bg-white/2 backdrop-blur-sm overflow-hidden group"
+                className="relative p-6 md:p-10 rounded-2xl border border-white/6 bg-white/2 backdrop-blur-sm overflow-hidden group"
               >
                 {/* Hover glow */}
                 <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
                 <div className="absolute top-6 right-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                  <Monitor className="w-24 h-24" />
+                  <Monitor className="w-16 md:w-24 h-16 md:h-24" />
                 </div>
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-1 h-8 bg-linear-to-brom-blue-400 to-purple-400 rounded-full" />
+                    <div className="w-1 h-8 bg-linear-to-b from-blue-400 to-purple-400 rounded-full" />
                     <h3 className="text-[11px] uppercase tracking-[0.3em] text-white/40 font-medium">Workstation</h3>
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-3 tracking-tight">{USER_DATA.hardware.primary}</h2>
-                  <p className="text-blue-300/60 font-mono text-sm mb-6">{USER_DATA.hardware.specs}</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-3 tracking-tight">{USER_DATA.hardware.primary}</h2>
+                  <p className="text-blue-300/60 font-mono text-xs md:text-sm mb-6">{USER_DATA.hardware.specs}</p>
                   <p className="text-white/30 leading-relaxed text-sm">{USER_DATA.hardware.description}</p>
                 </div>
 
                 {/* Bottom accent line */}
                 <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-px bg-bg-linear-to-rom-transparent via-blue-400/30 to-transparent"
+                  className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-blue-400/30 to-transparent"
                   initial={{ scaleX: 0 }}
                   whileInView={{ scaleX: 1 }}
                   viewport={{ once: true }}
@@ -1016,7 +1141,7 @@ export default function App() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-24 pt-16 border-t border-white/5"
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mt-16 md:mt-24 pt-12 md:pt-16 border-t border-white/5"
           >
             {[
               { label: "Projects Built", value: 10, suffix: "+" },
@@ -1025,10 +1150,10 @@ export default function App() {
               { label: "Lines of Code", value: 50, suffix: "K+" },
             ].map((stat, i) => (
               <div key={i} className="text-center md:text-left">
-                <div className="text-4xl font-bold text-white tracking-tight mb-2">
+                <div className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 </div>
-                <p className="text-[11px] uppercase tracking-[0.3em] text-white/25">{stat.label}</p>
+                <p className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/25">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -1037,7 +1162,7 @@ export default function App() {
         <MemoizedDistortionLine />
 
         {/* ════════ PROJECTS ════════ */}
-        <section id="projects" className="py-40 max-w-7xl mx-auto px-8">
+        <section id="projects" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           <MaskReveal>
             <div className="flex items-center gap-4 mb-4">
               <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">02</span>
@@ -1046,15 +1171,15 @@ export default function App() {
             </div>
           </MaskReveal>
 
-          <div className="flex items-end justify-between mb-20">
-            <SplitText className="text-5xl md:text-6xl font-bold tracking-[-0.03em] text-white" delay={0.1}>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-20 gap-4">
+            <SplitText className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-[-0.03em] text-white" delay={0.1}>
               Project Archive
             </SplitText>
             <motion.span
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="hidden md:block text-sm text-white/15 font-mono"
+              className="text-sm text-white/15 font-mono"
             >
               {USER_DATA.projects.length.toString().padStart(2, '0')} entries
             </motion.span>
@@ -1073,41 +1198,35 @@ export default function App() {
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
                 className="group block"
               >
-                <div className="relative py-10 px-8 -mx-8 rounded-2xl transition-all duration-500 hover:bg-white/3">
+                <div className="relative py-6 md:py-10 px-4 md:px-8 -mx-4 md:-mx-8 rounded-2xl transition-all duration-500 hover:bg-white/3 active:bg-white/5">
                   {/* Hover accent */}
                   <motion.div
-                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-blue-400 via-purple-400 to-cyan-400 rounded-full origin-top"
+                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-blue-400 via-purple-400 to-cyan-400 rounded-full origin-top hidden md:block"
                     initial={{ scaleY: 0, opacity: 0 }}
                     whileHover={{ scaleY: 1, opacity: 1 }}
                     transition={{ duration: 0.4 }}
                   />
 
-                  <div className="grid md:grid-cols-[auto_1fr_auto] gap-8 items-center">
+                  <div className="grid md:grid-cols-[auto_1fr_auto] gap-4 md:gap-8 items-start md:items-center">
                     {/* Number */}
-                    <span className="text-5xl font-bold text-white/6 group-hover:text-white/15 transition-colors duration-500 font-mono tracking-tighter">
+                    <span className="text-3xl md:text-5xl font-bold text-white/6 group-hover:text-white/15 transition-colors duration-500 font-mono tracking-tighter">
                       {project.number}
                     </span>
 
                     {/* Content */}
                     <div>
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-2xl font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-tight">
+                      <div className="flex items-center gap-3 mb-2 md:mb-3">
+                        <h3 className="text-xl md:text-2xl font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-tight">
                           {project.title}
                         </h3>
-                        <motion.div
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          animate={{ x: [0, 3, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                        >
-                          <ArrowUpRight className="w-5 h-5 text-white/40" />
-                        </motion.div>
+                        <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-white/40 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0" />
                       </div>
-                      <p className="text-white/25 text-sm leading-relaxed max-w-xl mb-4 group-hover:text-white/35 transition-colors duration-300">
+                      <p className="text-white/25 text-xs md:text-sm leading-relaxed max-w-xl mb-3 md:mb-4 group-hover:text-white/35 transition-colors duration-300">
                         {project.desc}
                       </p>
                       <div className="flex gap-2 flex-wrap">
                         {project.tech.map(t => (
-                          <span key={t} className="text-[10px] uppercase tracking-[0.15em] px-3 py-1 rounded-full border border-white/6 text-white/30 group-hover:border-white/12 group-hover:text-white/50 transition-all duration-300">
+                          <span key={t} className="text-[9px] md:text-[10px] uppercase tracking-[0.15em] px-2.5 md:px-3 py-1 rounded-full border border-white/6 text-white/30 group-hover:border-white/12 group-hover:text-white/50 transition-all duration-300">
                             {t}
                           </span>
                         ))}
@@ -1115,13 +1234,13 @@ export default function App() {
                     </div>
 
                     {/* Year */}
-                    <span className="text-sm text-white/15 font-mono group-hover:text-white/30 transition-colors">
+                    <span className="text-xs md:text-sm text-white/15 font-mono group-hover:text-white/30 transition-colors absolute top-6 right-4 md:static">
                       {project.year}
                     </span>
                   </div>
 
                   {/* Bottom border */}
-                  <div className="absolute bottom-0 left-8 right-8 h-px bg-white/4" />
+                  <div className="absolute bottom-0 left-4 right-4 md:left-8 md:right-8 h-px bg-white/4" />
                 </div>
               </motion.a>
             ))}
@@ -1131,9 +1250,9 @@ export default function App() {
         <MemoizedDistortionLine />
 
         {/* ════════ SKILLS ════════ */}
-        <section id="skills" className="py-40 max-w-7xl mx-auto px-8">
+        <section id="skills" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           {/* Header */}
-          <div className="mb-20">
+          <div className="mb-12 md:mb-20">
             <MaskReveal>
               <div className="flex items-center gap-4 mb-4">
                 <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">03</span>
@@ -1141,8 +1260,8 @@ export default function App() {
                 <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Expertise</span>
               </div>
             </MaskReveal>
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-              <SplitText className="text-5xl font-bold tracking-[-0.03em] text-white leading-[1.1]">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 lg:gap-6">
+              <SplitText className="text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.1]">
                 Technical Stack
               </SplitText>
               <motion.p
@@ -1150,7 +1269,7 @@ export default function App() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.4 }}
-                className="text-white/30 text-base leading-relaxed font-light max-w-sm lg:text-right"
+                className="text-white/30 text-sm md:text-base leading-relaxed font-light max-w-sm lg:text-right"
               >
                 B.Tech CSE · AI/ML Track · SRM Institute of Science and Technology
               </motion.p>
@@ -1158,7 +1277,7 @@ export default function App() {
           </div>
 
           {/* Category Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {USER_DATA.skillCategories.map((cat, idx) => (
               <motion.div
                 key={cat.category}
@@ -1166,28 +1285,28 @@ export default function App() {
                 whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.65, delay: idx * 0.09, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                className={`group relative rounded-2xl border border-white/6 bg-linear-to-br ${cat.color} backdrop-blur-sm overflow-hidden p-6 hover:border-white/14 transition-all duration-500`}
+                whileHover={isTouch ? {} : { y: -6, transition: { duration: 0.25 } }}
+                className={`group relative rounded-2xl border border-white/6 bg-linear-to-br ${cat.color} overflow-hidden p-5 md:p-6 hover:border-white/14 transition-all duration-500`}
               >
                 {/* Subtle noise texture overlay */}
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,white,transparent_70%)]" />
 
                 <div className="relative z-10">
                   {/* Category Header */}
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="p-2.5 rounded-lg bg-white/8 text-white/60 group-hover:text-white/90 group-hover:bg-white/12 transition-all duration-300">
+                  <div className="flex items-center gap-3 mb-4 md:mb-5">
+                    <div className="p-2 md:p-2.5 rounded-lg bg-white/8 text-white/60 group-hover:text-white/90 group-hover:bg-white/12 transition-all duration-300">
                       {cat.icon}
                     </div>
-                    <span className="text-[11px] uppercase tracking-[0.3em] text-white/35 font-mono group-hover:text-white/55 transition-colors">
+                    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/35 font-mono group-hover:text-white/55 transition-colors">
                       {cat.category}
                     </span>
                   </div>
 
                   {/* Accent line */}
-                  <div className={`h-px w-8 ${cat.accent} opacity-40 group-hover:opacity-70 group-hover:w-14 transition-all duration-500 mb-5`} />
+                  <div className={`h-px w-8 ${cat.accent} opacity-40 group-hover:opacity-70 group-hover:w-14 transition-all duration-500 mb-4 md:mb-5`} />
 
                   {/* Tech Pills */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {cat.items.map((item, i) => (
                       <motion.span
                         key={item}
@@ -1195,7 +1314,7 @@ export default function App() {
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
                         transition={{ delay: idx * 0.09 + i * 0.05 + 0.2 }}
-                        className="text-[11px] px-3 py-1.5 rounded-full border border-white/8 text-white/40 bg-white/3 group-hover:border-white/16 group-hover:text-white/65 group-hover:bg-white/6 transition-all duration-300"
+                        className="text-[10px] md:text-[11px] px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border border-white/8 text-white/40 bg-white/3 group-hover:border-white/16 group-hover:text-white/65 group-hover:bg-white/6 transition-all duration-300"
                       >
                         {item}
                       </motion.span>
@@ -1212,7 +1331,7 @@ export default function App() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.6 }}
-            className="mt-14 flex flex-wrap gap-8 items-center border-t border-white/5 pt-10"
+            className="mt-10 md:mt-14 flex flex-wrap gap-6 md:gap-8 items-center border-t border-white/5 pt-8 md:pt-10"
           >
             {[
               { label: "LeetCode & HackerRank", value: "80+" },
@@ -1221,8 +1340,8 @@ export default function App() {
               { label: "Year", value: "2nd" },
             ].map((stat) => (
               <div key={stat.label} className="flex flex-col gap-1">
-                <span className="text-2xl font-bold text-white/70 tracking-tight">{stat.value}</span>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-mono">{stat.label}</span>
+                <span className="text-xl md:text-2xl font-bold text-white/70 tracking-tight">{stat.value}</span>
+                <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/20 font-mono">{stat.label}</span>
               </div>
             ))}
           </motion.div>
@@ -1231,17 +1350,17 @@ export default function App() {
         <MemoizedDistortionLine />
 
         {/* ════════ CONTACT ════════ */}
-        <section id="contact" className="py-40 max-w-7xl mx-auto px-8">
+        <section id="contact" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           <MaskReveal>
             <div className="flex items-center gap-4 mb-4">
               <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">04</span>
-              <div className="w-8 h-px-white/20" />
+              <div className="w-8 h-px bg-white/20" />
               <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Contact</span>
             </div>
           </MaskReveal>
 
-          <div className="mt-16 mb-20">
-            <SplitText className="text-6xl md:text-[8rem] font-bold tracking-[-0.04em] text-white leading-[0.9]">
+          <div className="mt-10 md:mt-16 mb-12 md:mb-20">
+            <SplitText className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-bold tracking-[-0.04em] text-white leading-[0.9]">
               Let's build
             </SplitText>
             <div className="overflow-hidden">
@@ -1251,7 +1370,7 @@ export default function App() {
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                <span className="text-6xl md:text-[8rem] font-bold tracking-[-0.04em] leading-[0.9] bg-linear-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
+                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-bold tracking-[-0.04em] leading-[0.9] bg-linear-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
                   the future.
                 </span>
               </motion.div>
@@ -1263,7 +1382,7 @@ export default function App() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex flex-col gap-12"
+            className="flex flex-col gap-8 md:gap-12"
           >
             <div>
               <p className="text-[11px] uppercase tracking-[0.3em] text-white/20 mb-4">Drop a line</p>
@@ -1271,18 +1390,18 @@ export default function App() {
                 <motion.a
                   href={`mailto:${USER_DATA.contact.email}`}
                   whileHover={{ x: 10 }}
-                  className="group inline-flex items-center gap-4 text-2xl md:text-4xl font-light text-white/50 hover:text-white transition-colors duration-300"
+                  className="group inline-flex items-center gap-4 text-lg sm:text-xl md:text-2xl lg:text-4xl font-light text-white/50 hover:text-white transition-colors duration-300 break-all md:break-normal"
                 >
                   {USER_DATA.contact.email}
-                  <ArrowUpRight className="w-6 h-6 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0" />
+                  <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0 shrink-0 hidden sm:block" />
                 </motion.a>
               </Magnetic>
             </div>
 
             <LineReveal delay={0.3} />
 
-            <div className="flex items-center justify-between">
-              <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div className="flex gap-3 md:gap-4">
                 {USER_DATA.contact.socials.map((social) => (
                   <Magnetic key={social.name}>
                     <motion.a
@@ -1291,7 +1410,7 @@ export default function App() {
                       rel="noopener noreferrer"
                       whileHover={{ y: -4 }}
                       whileTap={{ scale: 0.95 }}
-                      className="p-4 rounded-full border border-white/6 text-white/30 hover:text-white hover:border-white/20 hover:bg-white/4 transition-all duration-300"
+                      className="p-3 md:p-4 rounded-full border border-white/6 text-white/30 hover:text-white hover:border-white/20 hover:bg-white/4 transition-all duration-300"
                       aria-label={social.name}
                     >
                       {social.icon}
