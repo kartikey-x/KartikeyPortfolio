@@ -644,88 +644,89 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-6 pt-48 pb-48">
 
         {/* ════════ HERO SECTION WITH PHOTO ════════ */}
-        <motion.section id="home" style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
-          className="min-h-[80vh] flex flex-col justify-center mb-32">
+        <motion.section
+          id="home"
+          style={{ y: heroY, opacity: heroOpacity, scale: heroScale }}
+          className="min-h-[70vh] flex flex-col md:flex-row items-center justify-between gap-12 mb-32"
+        >
+          {/* Left Column: Text */}
           <SoftReveal>
-            <div className="grid md:grid-cols-[1fr_auto] gap-16 items-center">
-              {/* Left: Text Content */}
-              <div>
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="h-px w-12 bg-primary/40" />
-                  <span className="text-xs uppercase tracking-[0.4em] text-primary/60 font-black">Digital Sanctuary</span>
-                </div>
-
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.05] text-foreground">
-                  {USER_DATA.name.split(" ").map((word, i) => (
-                    <span key={i} className="block overflow-hidden">
-                      <motion.span
-                        initial={{ y: "100%" }}
-                        animate={{ y: 0 }}
-                        transition={{ type: "spring", damping: 40, stiffness: 50, delay: 0.3 + i * 0.15 }}
-                        className="inline-block"
-                      >
-                        {word}
-                      </motion.span>
-                    </span>
-                  ))}
-                </h1>
-
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8, duration: 0.6 }}
-                  className="flex items-center gap-3 mb-6"
-                >
-                  <div className="h-px w-8 bg-primary/60" />
-                  <span className="text-sm uppercase tracking-[0.3em] text-primary font-bold">{USER_DATA.role}</span>
-                </motion.div>
-
-                <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-xl leading-relaxed mb-12">
-                  {USER_DATA.bio}
-                </p>
-
-                <div className="flex flex-wrap gap-5">
-                  <Magnetic>
-                    <motion.div whileTap={{ scale: 0.96 }}>
-                      <Button variant="default" size="lg"
-                        className="rounded-full px-10 h-14 text-xs uppercase tracking-widest font-black transition-transform bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl shadow-primary/15"
-                        onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}>
-                        Explore Work
-                      </Button>
-                    </motion.div>
-                  </Magnetic>
-                  <Magnetic>
-                    <motion.div whileTap={{ scale: 0.96 }}>
-                      <Button variant="outline" size="lg"
-                        className="rounded-full px-10 h-14 text-xs uppercase tracking-widest font-black glass hover:bg-primary/10 border-primary/15 text-foreground shadow-xl"
-                        onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}>
-                        Get in touch
-                      </Button>
-                    </motion.div>
-                  </Magnetic>
-                </div>
+            <div className="flex-1 max-w-2xl">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="h-px w-12 bg-primary/40" />
+                <span className="text-xs uppercase tracking-[0.4em] text-primary/60 font-black">
+                  Digital Sanctuary
+                </span>
               </div>
 
-              {/* Right: Profile Photo */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, x: 50 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                transition={{ type: "spring", damping: 25, stiffness: 60, delay: 0.5 }}
-                className="hidden md:block w-[320px] h-100"
-              >
-                <ProfilePhoto src={USER_DATA.profileImage} />
-              </motion.div>
-            </div>
+              <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8 leading-[1.1] text-foreground">
+                {USER_DATA.name.split(" ").map((word, i) => (
+                  <span key={i} className="block overflow-hidden">
+                    <motion.span
+                      initial={{ y: "100%" }}
+                      animate={{ y: 0 }}
+                      transition={{ type: "spring", damping: 40, stiffness: 50, delay: 0.2 + i * 0.1 }}
+                      className="inline-block"
+                    >
+                      {word}
+                    </motion.span>
+                  </span>
+                ))}
+              </h1>
 
-            {/* Mobile Photo */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-              className="md:hidden mt-12 w-62.5 h-80 mx-auto"
-            >
-              <ProfilePhoto src={USER_DATA.profileImage} />
-            </motion.div>
+              <p className="text-xl md:text-2xl text-muted-foreground font-medium leading-relaxed mb-12">
+                {USER_DATA.bio}
+              </p>
+
+              <div className="flex flex-wrap gap-6">
+                <Magnetic>
+                  <motion.div whileTap={{ scale: 0.96 }}>
+                    <Button
+                      variant="default"
+                      size="lg"
+                      className="rounded-full px-10 h-16 text-sm uppercase tracking-widest font-black transition-transform bg-primary text-primary-foreground hover:bg-primary/90 shadow-2xl shadow-primary/20"
+                      onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+                    >
+                      Explore Work
+                    </Button>
+                  </motion.div>
+                </Magnetic>
+                <Magnetic>
+                  <motion.div whileTap={{ scale: 0.96 }}>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="rounded-full px-10 h-16 text-sm uppercase tracking-widest font-black glass hover:bg-primary/10 border-primary/20 text-foreground shadow-xl"
+                      onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                    >
+                      Get in touch
+                    </Button>
+                  </motion.div>
+                </Magnetic>
+              </div>
+            </div>
+          </SoftReveal>
+
+          {/* Right Column: The Avatar */}
+          <SoftReveal delay={0.4}>
+            <div className="flex-1 relative flex justify-center items-center pointer-events-none md:pointer-events-auto">
+              <Magnetic>
+                <div className="relative w-64 h-64 md:w-96 md:h-96 group">
+                  {/* Background Ambient Glow */}
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/40 transition-colors duration-700 animate-breathe" />
+                  
+                  {/* The Image */}
+                  <img 
+                    src="/profile.png" 
+                    alt="Kartikey Singh" 
+                    className="relative z-10 w-full h-full object-contain drop-shadow-[0_0_30px_rgba(112,26,255,0.3)] 
+                               grayscale opacity-80 transition-all duration-700 ease-out
+                               group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105
+                               [mask-image[radial-gradient(circle_at_center,black_40%,transparent_80%)]"
+                  />
+                </div>
+              </Magnetic>
+            </div>
           </SoftReveal>
         </motion.section>
 
