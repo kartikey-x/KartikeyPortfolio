@@ -40,7 +40,8 @@ const USER_DATA = {
     specs: "Optimized for AI/ML Workloads",
     description: "Configured for local model training, data analysis using NumPy/Pandas, and full-stack backend development."
   },
-  skills: [
+  skills: 
+  [
     { name: "Machine Learning", icon: <Cpu className="w-5 h-5" />, level: "Specialist", desc: "Neural networks, NLP, computer vision" },
     { name: "Backend Architecture", icon: <Terminal className="w-5 h-5" />, level: "Expert", desc: "Flask, REST APIs, microservices" },
     { name: "Full-Stack Dev", icon: <Code2 className="w-5 h-5" />, level: "Proficient", desc: "React, TypeScript, Node.js" },
@@ -92,10 +93,10 @@ function CustomCursor() {
   const followerY = useMotionValue(-100);
   const [isHovering, setIsHovering] = useState(false);
 
-  const x = useSpring(cursorX, { damping: 25, stiffness: 300 });
-  const y = useSpring(cursorY, { damping: 25, stiffness: 300 });
-  const fx = useSpring(followerX, { damping: 18, stiffness: 120 });
-  const fy = useSpring(followerY, { damping: 18, stiffness: 120 });
+  const x = useSpring(cursorX, { damping: 25, stiffness: 280 });
+  const y = useSpring(cursorY, { damping: 25, stiffness: 280 });
+  const fx = useSpring(followerX, { damping: 18, stiffness: 100 });
+  const fy = useSpring(followerY, { damping: 18, stiffness: 100 });
 
   useEffect(() => {
     // We track state locally in the loop to prevent React from re-rendering
