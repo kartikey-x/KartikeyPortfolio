@@ -51,7 +51,7 @@ const USER_DATA = {
   bio: "B.Tech CSE student specializing in Artificial Intelligence and Machine Learning. Experienced in building Python-based tools and robust web applications with a focus on RESTful architectures and data-driven systems.",
   profileImage: "/profile.png",
   hardware: {
-    primary: "High-Performance Workstation",
+    primary: "MackBook Pro M4",
     specs: "Optimized for AI/ML Workloads",
     description: "Configured for local model training, data analysis using NumPy/Pandas, and full-stack backend development."
   },
