@@ -197,7 +197,7 @@ function CustomCursor() {
       <motion.div
         className="custom-cursor"
         style={{ x, y }}
-        animate={{ scale: isHovering ? 0.5 : 1 }}
+        animate={{ scale: isHovering ? 0.1 : 1 }}
       />
       <motion.div
         className="custom-cursor-follower"
@@ -217,8 +217,8 @@ function Magnetic({ children, className, strength = 0.35 }: { children: React.Re
   const isTouch = useIsTouchDevice();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const springX = useSpring(x, { damping: 30, stiffness: 150 });
-  const springY = useSpring(y, { damping: 30, stiffness: 150 });
+  const springX = useSpring(x, { damping: 30, stiffness: 300 });
+  const springY = useSpring(y, { damping: 30, stiffness: 300 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isTouch || !ref.current) return;
@@ -284,7 +284,7 @@ function CharReveal({ children, className, delay = 0 }: { children: string; clas
           initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
           animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
           transition={{
-            duration: 0.5,
+            duration: 0.1,
             delay: delay + i * 0.02,
             ease: [0.16, 1, 0.3, 1]
           }}
@@ -316,7 +316,7 @@ function LineReveal({ className, delay = 0 }: { className?: string; delay?: numb
 }
 
 // ─── PARALLAX SECTION (reduced on mobile) ───
-function ParallaxSection({ children, speed = 0.5, className }: { children: React.ReactNode; speed?: number; className?: string }) {
+function ParallaxSection({ children, speed = 0.1, className }: { children: React.ReactNode; speed?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const isTouch = useIsTouchDevice();
   const { scrollYProgress } = useScroll({
@@ -400,7 +400,7 @@ function InteractiveBackground() {
       "220, 168, 66",  /* Gold */
       "242, 235, 217", /* Champagne */
       "180, 130, 60",  /* Soft Bronze */
-      "200, 150, 50",  /* Muted Amber */
+      "200, 300, 50",  /* Muted Amber */
       "255, 245, 230", /* Warm White */
     ];
 
@@ -430,7 +430,7 @@ function InteractiveBackground() {
       const maxCount = isMobile ? 5 : 12;
       const count = Math.min(maxCount, Math.floor((width * height) / 100000));
       for (let i = 0; i < count; i++) {
-        const baseRadius = isMobile ? (80 + Math.random() * 150) : (100 + Math.random() * 250);
+        const baseRadius = isMobile ? (80 + Math.random() * 300) : (100 + Math.random() * 250);
         orbs.push({
           x: Math.random() * width, y: Math.random() * height,
           baseX: Math.random() * width, baseY: Math.random() * height,
@@ -440,7 +440,7 @@ function InteractiveBackground() {
           baseAlpha: 0.015 + Math.random() * 0.025,
           pulseSpeed: 0.15 + Math.random() * 0.4, pulsePhase: Math.random() * Math.PI * 2,
           driftSpeed: 0.08 + Math.random() * 0.15, driftAngle: Math.random() * Math.PI * 2,
-          driftRadius: 30 + Math.random() * 80, mass: 0.5 + Math.random() * 1.5,
+          driftRadius: 30 + Math.random() * 80, mass: 0.1 + Math.random() * 1.5,
         });
       }
       return orbs;
@@ -452,9 +452,9 @@ function InteractiveBackground() {
         particlesRef.current.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.15,
+          vx: (Math.random() - 0.1) * 0.15,
           vy: -0.05 - Math.random() * 0.15,
-          size: 0.5 + Math.random() * 1.2,
+          size: 0.1 + Math.random() * 1.2,
           alpha: 0.1 + Math.random() * 0.3,
           color: particleColors[Math.floor(Math.random() * particleColors.length)],
           life: Math.random() * 300,
@@ -516,7 +516,7 @@ function InteractiveBackground() {
 
         const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * pulse);
         gradient.addColorStop(0, `rgba(${orb.color}, ${orb.alpha * 2})`);
-        gradient.addColorStop(0.4, `rgba(${orb.color}, ${orb.alpha * 0.5})`);
+        gradient.addColorStop(0.4, `rgba(${orb.color}, ${orb.alpha * 0.1})`);
         gradient.addColorStop(1, `rgba(${orb.color}, 0)`);
         ctx.beginPath();
         ctx.arc(orb.x, orb.y, orb.radius * pulse, 0, Math.PI * 2);
@@ -587,7 +587,7 @@ function ScrollVelocityText({ text, className }: { text: string; className?: str
   useMotionValueEvent(scrollY, "change", (latest) => {
     const diff = latest - prevScroll.current;
     direction.current = diff > 0 ? -1 : 1;
-    velocity.current = Math.min(Math.abs(diff) * 0.5, 50);
+    velocity.current = Math.min(Math.abs(diff) * 0.1, 50);
     prevScroll.current = latest;
   });
 
@@ -650,13 +650,13 @@ function DistortionLine({ className }: { className?: string }) {
 
   return (
     <svg className={cn("w-full h-12 opacity-20", className)} viewBox="0 0 1000 50" preserveAspectRatio="none">
-      <path ref={pathRef} d="M 0 25 L 1000 25" stroke="url(#lineGrad)" strokeWidth="0.5" fill="none" />
+      <path ref={pathRef} d="M 0 25 L 1000 25" stroke="url(#lineGrad)" strokeWidth="0.1" fill="none" />
       <defs>
         <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="transparent" />
-          <stop offset="20%" stopColor="rgba(255,255,255,0.5)" />
+          <stop offset="20%" stopColor="rgba(255,255,255,0.1)" />
           <stop offset="50%" stopColor="rgba(120,180,255,0.8)" />
-          <stop offset="80%" stopColor="rgba(255,255,255,0.5)" />
+          <stop offset="80%" stopColor="rgba(255,255,255,0.1)" />
           <stop offset="100%" stopColor="transparent" />
         </linearGradient>
       </defs>
@@ -771,10 +771,10 @@ function Navigation() {
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-40 transition-all duration-700",
-          navScrolled ? "py-3 md:py-4 bg-background/50 backdrop-blur-md border-b border-white/5" : "py-5 md:py-8"
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
+          navScrolled ? "py-3 md:py-4 bg-transparent" : "py-5 md:py-8"
         )}
       >
         <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between">
@@ -834,51 +834,64 @@ function Navigation() {
   );
 }
 
-
-// ─── MAIN APPLICATION ───
-export default function App() {
-  // ─── 3D SCROLL UNFOLD WRAPPER ───
-function UnfoldSection({ children, id, className }: { children: React.ReactNode; id?: string; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
+// ─── THE HYPER-SPATIAL Z-DRIVE ENGINE ───
+// ─── THE HYPER-SPATIAL Z-DRIVE ENGINE (v2: Magnetic & Silky) ───
+function ZDriveLayer({ children, index, total = 5, id, className }: { children: React.ReactNode; index: number; total?: number; id?: string; className?: string }) {
+  const { scrollYProgress } = useScroll();
   const isTouch = useIsTouchDevice();
+  const [isActive, setIsActive] = useState(false);
 
-  // Track when the section enters the viewport
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    // Animation starts when the section's top hits the bottom of the screen.
-    // Animation ends when the section's top reaches 25% down from the top of the screen.
-    offset: ["start end", "start 25%"]
+  // The critical math fix: total - 1 ensures the last section lands exactly at the end of the scroll
+  const step = 1 / Math.max(1, total - 1); 
+  const enter = index * step - step;     
+  const land = index * step;            
+  const linger = index * step + (step * 0.15); // Shorter linger so it snaps out faster
+  const exit = index * step + step;      
+
+  // Reduced massive depths for higher performance and less "empty void" scrolling
+  const z = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? -3000 : -3500, 0, 0, isTouch ? 500 : 3000]);
+  const opacity = useTransform(scrollYProgress, [enter + (step * 0.2), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
+  const rotateX = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? 15 : 45, 0, 0, isTouch ? -15 : -45]);
+  
+  // Capped blur at 20px to eliminate rendering lag on GPUs
+  const blurValue = useTransform(scrollYProgress, [enter, land, linger, exit], [20, 0, 0, 20]);
+  const filter = useMotionTemplate`blur(${blurValue}px)`;
+
+  // Supercharged Springs: Low mass, high stiffness = silky and instantaneous
+  const smoothZ = useSpring(z, { damping: 20, stiffness: 300, mass: 0.1 });
+  const smoothOpacity = useSpring(opacity, { damping: 20, stiffness: 300, mass: 0.1 });
+  const smoothRotateX = useSpring(rotateX, { damping: 20, stiffness: 300, mass: 0.1 });
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    // Only activate pointer events when the layer is dead center
+    if (latest >= enter + (step * 0.2) && latest <= exit - (step * 0.2)) {
+      setIsActive(true);
+    } else {
+      setIsActive(false);
+    }
   });
 
-  // 3D fold parameters (Intensity reduced on touch devices to ensure smooth FPS)
-  const rotateX = useTransform(scrollYProgress, [0, 1], [isTouch ? 15 : 50, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [isTouch ? 50 : 150, 0]);
-
-  // Spring physics for buttery smoothness (removes the rigid 1:1 scroll tracking feel)
-  const smoothRotateX = useSpring(rotateX, { damping: 20, stiffness: 80 });
-  const smoothScale = useSpring(scale, { damping: 20, stiffness: 80 });
-  const smoothOpacity = useSpring(opacity, { damping: 25, stiffness: 100 });
-  const smoothY = useSpring(y, { damping: 20, stiffness: 80 });
-
   return (
-    <section ref={ref} id={id} className={cn("perspective-[2500px]", className)}>
-      <motion.div
-        style={{
-          rotateX: smoothRotateX,
-          scale: smoothScale,
-          opacity: smoothOpacity,
-          y: smoothY,
-          transformOrigin: "top center",
-        }}
-        className="will-change-transform transform-3d"
-      >
+    <motion.section
+      id={id}
+      style={{
+        z: smoothZ,
+        opacity: smoothOpacity,
+        rotateX: smoothRotateX,
+        filter: isTouch ? "none" : filter,
+        pointerEvents: isActive ? "auto" : "none",
+        transformOrigin: "center center",
+      }}
+      className="absolute inset-0 flex items-center justify-center w-full h-full will-change-transform transform-style-3d px-5 md:px-8"
+    >
+      <div className={cn("w-full max-w-7xl mx-auto", className)}>
         {children}
-      </motion.div>
-    </section>
+      </div>
+    </motion.section>
   );
 }
+// ─── MAIN APPLICATION ───
+export default function App() {
   const [mounted, setMounted] = useState(false);
   const isTouch = useIsTouchDevice();
   const { scrollYProgress } = useScroll();
@@ -886,15 +899,6 @@ function UnfoldSection({ children, id, className }: { children: React.ReactNode;
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"]
-  });
-  const heroY = useTransform(heroProgress, [0, 1], [0, -200]);
-  const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
-  const heroScale = useTransform(heroProgress, [0, 0.6], [1, 0.85]);
 
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
@@ -910,7 +914,7 @@ function UnfoldSection({ children, id, className }: { children: React.ReactNode;
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative overflow-x-hidden bg-[#0d0c0b]">
       {/* Only render custom cursor on non-touch devices */}
       {!isTouch && <MemoizedCustomCursor />}
       <div className="grain" />
@@ -921,15 +925,19 @@ function UnfoldSection({ children, id, className }: { children: React.ReactNode;
 
       <Navigation />
 
-      <main>
-        {/* ════════ HERO ════════ */}
-        <motion.section
-          ref={heroRef}
-          id="home"
-          style={isTouch ? { opacity: heroOpacity } : { y: heroY, opacity: heroOpacity, scale: heroScale }}
-          className="relative min-h-screen flex items-center justify-center overflow-hidden"
-        >
-          <div className="max-w-7xl mx-auto px-5 md:px-8 w-full pt-28 md:pt-32 pb-24 md:pb-32">
+      {/* ─── THE MAGNETIC SCROLL TRACK (STRICT 5 PAGES) ─── */}
+      <div className="w-full z-0 flex flex-col">
+        {/* Using 100dvh instead of h-screen forces the exact window height, killing the ghost page */}
+        {[0, 1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-dvh w-full snap-center snap-always" />
+        ))}
+      </div>
+
+      {/* ─── THE FIXED GLASS COCKPIT ─── */}
+      <main className="fixed inset-0 w-full h-dvh overflow-hidden perspective-[2500px] pointer-events-none z-10">
+
+          {/* Layer 0: Hero (index 0) */}
+          <ZDriveLayer index={0} id="home" className="pt-28 md:pt-32 pb-24 md:pb-32">
             <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-center">
               {/* Left: Text Content */}
               <div className="relative z-10 order-2 lg:order-1">
@@ -944,10 +952,10 @@ function UnfoldSection({ children, id, className }: { children: React.ReactNode;
                     className="w-8 md:w-12 h-px bg-white/30"
                     initial={{ scaleX: 0 }}
                     animate={mounted ? { scaleX: 1 } : {}}
-                    transition={{ duration: 1, delay: 0.5 }}
+                    transition={{ duration: 1, delay: 0.1 }}
                     style={{ transformOrigin: "left" }}
                   />
-                  <span className="text-[10px] md:text-[11px] uppercase tracking-[0.4em] md:tracking-[0.5em] text-white/50 font-medium">
+                  <span className="text-[10px] md:text-[11px] uppercase tracking-[0.4em] md:tracking-widest text-white/50 font-medium">
                     Portfolio / 2026
                   </span>
                 </motion.div>
@@ -1072,7 +1080,7 @@ function UnfoldSection({ children, id, className }: { children: React.ReactNode;
                                    group-hover:grayscale-0 group-hover:contrast-100
                                    transition-all duration-700 ease-out will-change-[filter,transform]"
                       />
-                      <div className="absolute inset-0 z-20 bg-linear-to-t from-[#050510]/60 via-transparent to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 z-20 bg-linear-to-t from-[#0d0c0b]/60 via-transparent to-transparent pointer-events-none" />
                     </div>
 
                     {/* Floating status badge */}
@@ -1088,386 +1096,360 @@ function UnfoldSection({ children, id, className }: { children: React.ReactNode;
                 </Magnetic>
               </motion.div>
             </div>
+          </ZDriveLayer>
 
-            {/* Scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={mounted ? { opacity: 1 } : {}}
-              transition={{ delay: 2 }}
-              className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex-col items-center gap-3 hidden md:flex"
-            >
-              <span className="text-[10px] uppercase tracking-[0.4em] text-white/25">Scroll</span>
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="w-px h-8 bg-linear-to-b from-white/30 to-transparent"
-              />
-            </motion.div>
-          </div>
-        </motion.section>
-
-        {/* ════════ SCROLL VELOCITY MARQUEE ════════ */}
-        <div className="py-4 md:py-8 overflow-hidden">
-          <ScrollVelocityText text="AI/ML · Full-Stack · Python · Architecture" />
-        </div>
-
-        {/* ════════ ABOUT / HARDWARE ════════ */}
-        <UnfoldSection className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            <div>
-              <MaskReveal>
-                <div className="flex items-center gap-4 mb-8">
-                  <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">01</span>
-                  <div className="w-8 h-px bg-white/20" />
-                  <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">About</span>
-                </div>
-              </MaskReveal>
-
-              <SplitText className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.15] mb-8">
-                Engineered for raw computational performance
-              </SplitText>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="text-white/35 text-base md:text-lg leading-relaxed font-light"
-              >
-                My workflow is built around efficiency and raw computational power.
-                I believe that the tools we use define the boundaries of what we can create.
-              </motion.p>
-            </div>
-
-            <ParallaxSection speed={0.3}>
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ y: -5, transition: { duration: 0.3 } }}
-                className="relative p-6 md:p-10 rounded-2xl border border-white/6 bg-white/2 backdrop-blur-sm overflow-hidden group"
-              >
-                {/* Hover glow */}
-                <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                <div className="absolute top-6 right-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                  <Monitor className="w-16 md:w-24 h-16 md:h-24" />
-                </div>
-
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-1 h-8 bg-linear-to-b from-blue-400 to-purple-400 rounded-full" />
-                    <h3 className="text-[11px] uppercase tracking-[0.3em] text-white/40 font-medium">Workstation</h3>
+          {/* Layer 1: About (index 1) */}
+          <ZDriveLayer index={1} id="about">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+              <div>
+                <MaskReveal>
+                  <div className="flex items-center gap-4 mb-8">
+                    <span className="text-[11px] uppercase tracking-widest text-white/30 font-mono">01</span>
+                    <div className="w-8 h-px bg-white/20" />
+                    <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">About</span>
                   </div>
-                  <h2 className="text-xl md:text-2xl font-bold text-white mb-3 tracking-tight">{USER_DATA.hardware.primary}</h2>
-                  <p className="text-blue-300/60 font-mono text-xs md:text-sm mb-6">{USER_DATA.hardware.specs}</p>
-                  <p className="text-white/30 leading-relaxed text-sm">{USER_DATA.hardware.description}</p>
-                </div>
+                </MaskReveal>
 
-                {/* Bottom accent line */}
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-blue-400/30 to-transparent"
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
+                <SplitText className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.15] mb-8">
+                  Engineered for raw computational performance
+                </SplitText>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 1.5, delay: 0.5 }}
-                />
-              </motion.div>
-            </ParallaxSection>
-          </div>
-
-          {/* Stats row */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mt-16 md:mt-24 pt-12 md:pt-16 border-t border-white/5"
-          >
-            {[
-              { label: "Projects Built", value: 10, suffix: "+" },
-              { label: "Technologies", value: 15, suffix: "+" },
-              { label: "Years Coding", value: 3, suffix: "+" },
-              { label: "Lines of Code", value: 50, suffix: "K+" },
-            ].map((stat, i) => (
-              <div key={i} className="text-center md:text-left">
-                <div className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
-                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                </div>
-                <p className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/25">{stat.label}</p>
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  className="text-white/35 text-base md:text-lg leading-relaxed font-light"
+                >
+                  My workflow is built around efficiency and raw computational power.
+                  I believe that the tools we use define the boundaries of what we can create.
+                </motion.p>
               </div>
-            ))}
-          </motion.div>
-        </UnfoldSection>
 
-        <MemoizedDistortionLine />
+              <ParallaxSection speed={0.3}>
+                <motion.div
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
+                  className="relative p-6 md:p-10 rounded-2xl border border-white/6 bg-white/2 backdrop-blur-sm overflow-hidden group"
+                >
+                  {/* Hover glow */}
+                  <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 to-yellow-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-        {/* ════════ PROJECTS ════════ */}
-        <UnfoldSection id="projects" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
-          <MaskReveal>
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">02</span>
-              <div className="w-8 h-px bg-white/20" />
-              <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Selected Works</span>
-            </div>
-          </MaskReveal>
-
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-20 gap-4">
-            <SplitText className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-[-0.03em] text-white" delay={0.1}>
-              Project Archive
-            </SplitText>
-            <motion.span
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-sm text-white/15 font-mono"
-            >
-              {USER_DATA.projects.length.toString().padStart(2, '0')} entries
-            </motion.span>
-          </div>
-
-          <div className="space-y-2">
-            {USER_DATA.projects.map((project, idx) => (
-              <motion.a
-                key={project.title}
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="group block"
-              >
-                <div className="relative py-6 md:py-10 px-4 md:px-8 -mx-4 md:-mx-8 rounded-2xl transition-all duration-500 hover:bg-white/3 active:bg-white/5">
-                  {/* Hover accent */}
-                  <motion.div
-                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-linear-to-b from-blue-400 via-purple-400 to-cyan-400 rounded-full origin-top hidden md:block"
-                    initial={{ scaleY: 0, opacity: 0 }}
-                    whileHover={{ scaleY: 1, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                  />
-
-                  <div className="grid md:grid-cols-[auto_1fr_auto] gap-4 md:gap-8 items-start md:items-center">
-                    {/* Number */}
-                    <span className="text-3xl md:text-5xl font-bold text-white/6 group-hover:text-white/15 transition-colors duration-500 font-mono tracking-tighter">
-                      {project.number}
-                    </span>
-
-                    {/* Content */}
-                    <div>
-                      <div className="flex items-center gap-3 mb-2 md:mb-3">
-                        <h3 className="text-xl md:text-2xl font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-tight">
-                          {project.title}
-                        </h3>
-                        <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-white/40 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0" />
-                      </div>
-                      <p className="text-white/25 text-xs md:text-sm leading-relaxed max-w-xl mb-3 md:mb-4 group-hover:text-white/35 transition-colors duration-300">
-                        {project.desc}
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {project.tech.map(t => (
-                          <span key={t} className="text-[9px] md:text-[10px] uppercase tracking-[0.15em] px-2.5 md:px-3 py-1 rounded-full border border-white/6 text-white/30 group-hover:border-white/12 group-hover:text-white/50 transition-all duration-300">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Year */}
-                    <span className="text-xs md:text-sm text-white/15 font-mono group-hover:text-white/30 transition-colors absolute top-6 right-4 md:static">
-                      {project.year}
-                    </span>
+                  <div className="absolute top-6 right-6 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                    <Monitor className="w-16 md:w-24 h-16 md:h-24" />
                   </div>
 
-                  {/* Bottom border */}
-                  <div className="absolute bottom-0 left-4 right-4 md:left-8 md:right-8 h-px bg-white/4" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-1 h-8 bg-linear-to-b from-amber-400 to-yellow-600 rounded-full" />
+                      <h3 className="text-[11px] uppercase tracking-[0.3em] text-white/40 font-medium">Workstation</h3>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white mb-3 tracking-tight">{USER_DATA.hardware.primary}</h2>
+                    <p className="text-amber-300/60 font-mono text-xs md:text-sm mb-6">{USER_DATA.hardware.specs}</p>
+                    <p className="text-white/30 leading-relaxed text-sm">{USER_DATA.hardware.description}</p>
+                  </div>
+
+                  {/* Bottom accent line */}
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-amber-400/30 to-transparent"
+                    initial={{ scaleX: 0 }}
+                    whileInView={{ scaleX: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, delay: 0.1 }}
+                  />
+                </motion.div>
+              </ParallaxSection>
+            </div>
+
+            {/* Stats row */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mt-16 md:mt-24 pt-12 md:pt-16 border-t border-white/5"
+            >
+              {[
+                { label: "Projects Built", value: 10, suffix: "+" },
+                { label: "Technologies", value: 15, suffix: "+" },
+                { label: "Years Coding", value: 3, suffix: "+" },
+                { label: "Lines of Code", value: 50, suffix: "K+" },
+              ].map((stat, i) => (
+                <div key={i} className="text-center md:text-left">
+                  <div className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-2">
+                    <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                  </div>
+                  <p className="text-[10px] md:text-[11px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/25">{stat.label}</p>
                 </div>
-              </motion.a>
-            ))}
-          </div>
-        </UnfoldSection>
+              ))}
+            </motion.div>
+          </ZDriveLayer>
 
-        <MemoizedDistortionLine />
-
-        {/* ════════ SKILLS ════════ */}
-        <UnfoldSection id="skills" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
-          {/* Header */}
-          <div className="mb-12 md:mb-20">
+          {/* Layer 2: Projects (index 2) */}
+          <ZDriveLayer index={2} id="projects">
             <MaskReveal>
               <div className="flex items-center gap-4 mb-4">
-                <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">03</span>
+                <span className="text-[11px] uppercase tracking-widest text-white/30 font-mono">02</span>
                 <div className="w-8 h-px bg-white/20" />
-                <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Expertise</span>
+                <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Selected Works</span>
               </div>
             </MaskReveal>
-            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 lg:gap-6">
-              <SplitText className="text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.1]">
-                Technical Stack
+
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-20 gap-4">
+              <SplitText className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-[-0.03em] text-white" delay={0.1}>
+                Project Archive
               </SplitText>
-              <motion.p
+              <motion.span
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-                className="text-white/30 text-sm md:text-base leading-relaxed font-light max-w-sm lg:text-right"
+                className="text-sm text-white/15 font-mono"
               >
-                B.Tech CSE · AI/ML Track · SRM Institute of Science and Technology
-              </motion.p>
+                {USER_DATA.projects.length.toString().padStart(2, '0')} entries
+              </motion.span>
             </div>
-          </div>
 
-          {/* Category Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-            {USER_DATA.skillCategories.map((cat, idx) => (
-              <motion.div
-                key={cat.category}
-                initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.65, delay: idx * 0.09, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={isTouch ? {} : { y: -6, transition: { duration: 0.25 } }}
-                className={`group relative rounded-2xl border border-white/6 bg-linear-to-br ${cat.color} overflow-hidden p-5 md:p-6 hover:border-white/14 transition-all duration-500`}
-              >
-                {/* Subtle noise texture overlay */}
-                <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,white,transparent_70%)]" />
-
-                <div className="relative z-10">
-                  {/* Category Header */}
-                  <div className="flex items-center gap-3 mb-4 md:mb-5">
-                    <div className="p-2 md:p-2.5 rounded-lg bg-white/8 text-white/60 group-hover:text-white/90 group-hover:bg-white/12 transition-all duration-300">
-                      {cat.icon}
-                    </div>
-                    <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/35 font-mono group-hover:text-white/55 transition-colors">
-                      {cat.category}
-                    </span>
-                  </div>
-
-                  {/* Accent line */}
-                  <div className={`h-px w-8 ${cat.accent} opacity-40 group-hover:opacity-70 group-hover:w-14 transition-all duration-500 mb-4 md:mb-5`} />
-
-                  {/* Tech Pills */}
-                  <div className="flex flex-wrap gap-1.5 md:gap-2">
-                    {cat.items.map((item, i) => (
-                      <motion.span
-                        key={item}
-                        initial={{ opacity: 0, scale: 0.85 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: idx * 0.09 + i * 0.05 + 0.2 }}
-                        className="text-[10px] md:text-[11px] px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border border-white/8 text-white/40 bg-white/3 group-hover:border-white/16 group-hover:text-white/65 group-hover:bg-white/6 transition-all duration-300"
-                      >
-                        {item}
-                      </motion.span>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Bottom stat bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6 }}
-            className="mt-10 md:mt-14 flex flex-wrap gap-6 md:gap-8 items-center border-t border-white/5 pt-8 md:pt-10"
-          >
-            {[
-              { label: "LeetCode & HackerRank", value: "80+" },
-              { label: "Problems Solved", value: "Algo" },
-              { label: "Specialisation", value: "AI / ML" },
-              { label: "Year", value: "2nd" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col gap-1">
-                <span className="text-xl md:text-2xl font-bold text-white/70 tracking-tight">{stat.value}</span>
-                <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/20 font-mono">{stat.label}</span>
-              </div>
-            ))}
-          </motion.div>
-        </UnfoldSection>
-
-        <MemoizedDistortionLine />
-
-        {/* ════════ CONTACT ════════ */}
-        <UnfoldSection id="contact" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
-          <MaskReveal>
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">04</span>
-              <div className="w-8 h-px bg-white/20" />
-              <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Contact</span>
-            </div>
-          </MaskReveal>
-
-          <div className="mt-10 md:mt-16 mb-12 md:mb-20">
-            <SplitText className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-bold tracking-[-0.04em] text-white leading-[0.9]">
-              Let's build
-            </SplitText>
-            <div className="overflow-hidden">
-              <motion.div
-                initial={{ y: "100%" }}
-                whileInView={{ y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-bold tracking-[-0.04em] leading-[0.9] bg-linear-to-r from-blue-300 via-purple-300 to-cyan-300 bg-clip-text text-transparent">
-                  the future.
-                </span>
-              </motion.div>
-            </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex flex-col gap-8 md:gap-12"
-          >
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.3em] text-white/20 mb-4">Drop a line</p>
-              <Magnetic>
+            <div className="space-y-2">
+              {USER_DATA.projects.map((project, idx) => (
                 <motion.a
-                  href={`mailto:${USER_DATA.contact.email}`}
-                  whileHover={{ x: 10 }}
-                  className="group inline-flex items-center gap-4 text-lg sm:text-xl md:text-2xl lg:text-4xl font-light text-white/50 hover:text-white transition-colors duration-300 break-all md:break-normal"
+                  key={project.title}
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, delay: idx * 0.1 }}
+                  className="group block"
                 >
-                  {USER_DATA.contact.email}
-                  <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0 shrink-0 hidden sm:block" />
+                  <div className="relative py-6 md:py-10 px-4 md:px-8 -mx-4 md:-mx-8 rounded-2xl transition-all duration-500 hover:bg-white/3 active:bg-white/5">
+                    {/* Hover accent */}
+                    <motion.div
+                      className="absolute left-0 top-0 bottom-0 w-0.1 bg-linear-to-b from-amber-400 via-yellow-500 to-amber-600 rounded-full origin-top hidden md:block"
+                      initial={{ scaleY: 0, opacity: 0 }}
+                      whileHover={{ scaleY: 1, opacity: 1 }}
+                      transition={{ duration: 0.4 }}
+                    />
+
+                    <div className="grid md:grid-cols-[auto_1fr_auto] gap-4 md:gap-8 items-start md:items-center">
+                      {/* Number */}
+                      <span className="text-3xl md:text-5xl font-bold text-white/6 group-hover:text-white/15 transition-colors duration-500 font-mono tracking-tighter">
+                        {project.number}
+                      </span>
+
+                      {/* Content */}
+                      <div>
+                        <div className="flex items-center gap-3 mb-2 md:mb-3">
+                          <h3 className="text-xl md:text-2xl font-bold text-white/80 group-hover:text-white transition-colors duration-300 tracking-tight">
+                            {project.title}
+                          </h3>
+                          <ArrowUpRight className="w-4 h-4 md:w-5 md:h-5 text-white/40 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0" />
+                        </div>
+                        <p className="text-white/25 text-xs md:text-sm leading-relaxed max-w-xl mb-3 md:mb-4 group-hover:text-white/35 transition-colors duration-300">
+                          {project.desc}
+                        </p>
+                        <div className="flex gap-2 flex-wrap">
+                          {project.tech.map(t => (
+                            <span key={t} className="text-[9px] md:text-[10px] uppercase tracking-[0.15em] px-2.5 md:px-3 py-1 rounded-full border border-white/6 text-white/30 group-hover:border-white/12 group-hover:text-white/50 transition-all duration-300">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Year */}
+                      <span className="text-xs md:text-sm text-white/15 font-mono group-hover:text-white/30 transition-colors absolute top-6 right-4 md:static">
+                        {project.year}
+                      </span>
+                    </div>
+
+                    {/* Bottom border */}
+                    <div className="absolute bottom-0 left-4 right-4 md:left-8 md:right-8 h-px bg-white/4" />
+                  </div>
                 </motion.a>
-              </Magnetic>
+              ))}
+            </div>
+          </ZDriveLayer>
+
+          {/* Layer 3: Skills (index 3) */}
+          <ZDriveLayer index={3} id="skills">
+            {/* Header */}
+            <div className="mb-12 md:mb-20">
+              <MaskReveal>
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-[11px] uppercase tracking-widest text-white/30 font-mono">03</span>
+                  <div className="w-8 h-px bg-white/20" />
+                  <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Expertise</span>
+                </div>
+              </MaskReveal>
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 lg:gap-6">
+                <SplitText className="text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.1]">
+                  Technical Stack
+                </SplitText>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 }}
+                  className="text-white/30 text-sm md:text-base leading-relaxed font-light max-w-sm lg:text-right"
+                >
+                  B.Tech CSE · AI/ML Track · SRM Institute of Science and Technology
+                </motion.p>
+              </div>
             </div>
 
-            <LineReveal delay={0.3} />
+            {/* Category Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+              {USER_DATA.skillCategories.map((cat, idx) => (
+                <motion.div
+                  key={cat.category}
+                  initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.65, delay: idx * 0.09, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={isTouch ? {} : { y: -6, transition: { duration: 0.25 } }}
+                  className={`group relative rounded-2xl border border-white/6 bg-linear-to-br ${cat.color} overflow-hidden p-5 md:p-6 hover:border-white/14 transition-all duration-500`}
+                >
+                  {/* Subtle noise texture overlay */}
+                  <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_50%_50%,white,transparent_70%)]" />
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-              <div className="flex gap-3 md:gap-4">
-                {USER_DATA.contact.socials.map((social) => (
-                  <Magnetic key={social.name}>
-                    <motion.a
-                      href={social.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ y: -4 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-3 md:p-4 rounded-full border border-white/6 text-white/30 hover:text-white hover:border-white/20 hover:bg-white/4 transition-all duration-300"
-                      aria-label={social.name}
-                    >
-                      {social.icon}
-                    </motion.a>
-                  </Magnetic>
-                ))}
+                  <div className="relative z-10">
+                    {/* Category Header */}
+                    <div className="flex items-center gap-3 mb-4 md:mb-5">
+                      <div className="p-2 md:p-2.5 rounded-lg bg-white/8 text-white/60 group-hover:text-white/90 group-hover:bg-white/12 transition-all duration-300">
+                        {cat.icon}
+                      </div>
+                      <span className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/35 font-mono group-hover:text-white/55 transition-colors">
+                        {cat.category}
+                      </span>
+                    </div>
+
+                    {/* Accent line */}
+                    <div className={`h-px w-8 ${cat.accent} opacity-40 group-hover:opacity-70 group-hover:w-14 transition-all duration-500 mb-4 md:mb-5`} />
+
+                    {/* Tech Pills */}
+                    <div className="flex flex-wrap gap-1.5 md:gap-2">
+                      {cat.items.map((item, i) => (
+                        <motion.span
+                          key={item}
+                          initial={{ opacity: 0, scale: 0.85 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.09 + i * 0.05 + 0.2 }}
+                          className="text-[10px] md:text-[11px] px-2.5 md:px-3 py-1 md:py-1.5 rounded-full border border-white/8 text-white/40 bg-white/3 group-hover:border-white/16 group-hover:text-white/65 group-hover:bg-white/6 transition-all duration-300"
+                        >
+                          {item}
+                        </motion.span>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Bottom stat bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+              className="mt-10 md:mt-14 flex flex-wrap gap-6 md:gap-8 items-center border-t border-white/5 pt-8 md:pt-10"
+            >
+              {[
+                { label: "LeetCode & HackerRank", value: "80+" },
+                { label: "Problems Solved", value: "Algo" },
+                { label: "Specialisation", value: "AI / ML" },
+                { label: "Year", value: "2nd" },
+              ].map((stat) => (
+                <div key={stat.label} className="flex flex-col gap-1">
+                  <span className="text-xl md:text-2xl font-bold text-white/70 tracking-tight">{stat.value}</span>
+                  <span className="text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] text-white/20 font-mono">{stat.label}</span>
+                </div>
+              ))}
+            </motion.div>
+          </ZDriveLayer>
+
+          {/* Layer 4: Contact (index 4) */}
+          <ZDriveLayer index={4} id="contact">
+            <MaskReveal>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-[11px] uppercase tracking-widest text-white/30 font-mono">04</span>
+                <div className="w-8 h-px bg-white/20" />
+                <span className="text-[11px] uppercase tracking-[0.4em] text-white/40">Contact</span>
+              </div>
+            </MaskReveal>
+
+            <div className="mt-10 md:mt-16 mb-12 md:mb-20">
+              <SplitText className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-bold tracking-[-0.04em] text-white leading-[0.9]">
+                Let's build
+              </SplitText>
+              <div className="overflow-hidden">
+                <motion.div
+                  initial={{ y: "100%" }}
+                  whileInView={{ y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <span className="text-4xl sm:text-5xl md:text-6xl lg:text-[8rem] font-bold tracking-[-0.04em] leading-[0.9] bg-linear-to-r from-amber-300 via-yellow-400 to-amber-600 bg-clip-text text-transparent">
+                    the future.
+                  </span>
+                </motion.div>
+              </div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="flex flex-col gap-8 md:gap-12"
+            >
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.3em] text-white/20 mb-4">Drop a line</p>
+                <Magnetic>
+                  <motion.a
+                    href={`mailto:${USER_DATA.contact.email}`}
+                    whileHover={{ x: 10 }}
+                    className="group inline-flex items-center gap-4 text-lg sm:text-xl md:text-2xl lg:text-4xl font-light text-white/50 hover:text-white transition-colors duration-300 break-all md:break-normal"
+                  >
+                    {USER_DATA.contact.email}
+                    <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0 shrink-0 hidden sm:block" />
+                  </motion.a>
+                </Magnetic>
               </div>
 
-              <p className="text-[10px] uppercase tracking-[0.4em] text-white/15">
-                © {new Date().getFullYear()} Kartikey Singh
-              </p>
-            </div>
-          </motion.div>
-        </UnfoldSection>
-      </main>
-    </div>
+              <LineReveal delay={0.3} />
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                <div className="flex gap-3 md:gap-4">
+                  {USER_DATA.contact.socials.map((social) => (
+                    <Magnetic key={social.name}>
+                      <motion.a
+                        href={social.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ y: -4 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="p-3 md:p-4 rounded-full border border-white/6 text-white/30 hover:text-white hover:border-white/20 hover:bg-white/4 transition-all duration-300"
+                        aria-label={social.name}
+                      >
+                        {social.icon}
+                      </motion.a>
+                    </Magnetic>
+                  ))}
+                </div>
+
+                <p className="text-[10px] uppercase tracking-[0.4em] text-white/15">
+                  © {new Date().getFullYear()} Kartikey Singh
+                </p>
+              </div>
+            </motion.div>
+          </ZDriveLayer>
+
+        </main>
+      </div>
   );
 }
