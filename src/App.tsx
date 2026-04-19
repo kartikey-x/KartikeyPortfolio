@@ -837,6 +837,48 @@ function Navigation() {
 
 // ─── MAIN APPLICATION ───
 export default function App() {
+  // ─── 3D SCROLL UNFOLD WRAPPER ───
+function UnfoldSection({ children, id, className }: { children: React.ReactNode; id?: string; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isTouch = useIsTouchDevice();
+
+  // Track when the section enters the viewport
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    // Animation starts when the section's top hits the bottom of the screen.
+    // Animation ends when the section's top reaches 25% down from the top of the screen.
+    offset: ["start end", "start 25%"]
+  });
+
+  // 3D fold parameters (Intensity reduced on touch devices to ensure smooth FPS)
+  const rotateX = useTransform(scrollYProgress, [0, 1], [isTouch ? 15 : 50, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 1], [isTouch ? 50 : 150, 0]);
+
+  // Spring physics for buttery smoothness (removes the rigid 1:1 scroll tracking feel)
+  const smoothRotateX = useSpring(rotateX, { damping: 20, stiffness: 80 });
+  const smoothScale = useSpring(scale, { damping: 20, stiffness: 80 });
+  const smoothOpacity = useSpring(opacity, { damping: 25, stiffness: 100 });
+  const smoothY = useSpring(y, { damping: 20, stiffness: 80 });
+
+  return (
+    <section ref={ref} id={id} className={cn("perspective-[2500px]", className)}>
+      <motion.div
+        style={{
+          rotateX: smoothRotateX,
+          scale: smoothScale,
+          opacity: smoothOpacity,
+          y: smoothY,
+          transformOrigin: "top center",
+        }}
+        className="will-change-transform transform-3d"
+      >
+        {children}
+      </motion.div>
+    </section>
+  );
+}
   const [mounted, setMounted] = useState(false);
   const isTouch = useIsTouchDevice();
   const { scrollYProgress } = useScroll();
@@ -1070,7 +1112,7 @@ export default function App() {
         </div>
 
         {/* ════════ ABOUT / HARDWARE ════════ */}
-        <section className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
+        <UnfoldSection className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
             <div>
               <MaskReveal>
@@ -1157,12 +1199,12 @@ export default function App() {
               </div>
             ))}
           </motion.div>
-        </section>
+        </UnfoldSection>
 
         <MemoizedDistortionLine />
 
         {/* ════════ PROJECTS ════════ */}
-        <section id="projects" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
+        <UnfoldSection id="projects" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           <MaskReveal>
             <div className="flex items-center gap-4 mb-4">
               <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">02</span>
@@ -1245,12 +1287,12 @@ export default function App() {
               </motion.a>
             ))}
           </div>
-        </section>
+        </UnfoldSection>
 
         <MemoizedDistortionLine />
 
         {/* ════════ SKILLS ════════ */}
-        <section id="skills" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
+        <UnfoldSection id="skills" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           {/* Header */}
           <div className="mb-12 md:mb-20">
             <MaskReveal>
@@ -1345,12 +1387,12 @@ export default function App() {
               </div>
             ))}
           </motion.div>
-        </section>
+        </UnfoldSection>
 
         <MemoizedDistortionLine />
 
         {/* ════════ CONTACT ════════ */}
-        <section id="contact" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
+        <UnfoldSection id="contact" className="py-20 md:py-40 max-w-7xl mx-auto px-5 md:px-8">
           <MaskReveal>
             <div className="flex items-center gap-4 mb-4">
               <span className="text-[11px] uppercase tracking-[0.5em] text-white/30 font-mono">04</span>
@@ -1424,7 +1466,7 @@ export default function App() {
               </p>
             </div>
           </motion.div>
-        </section>
+        </UnfoldSection>
       </main>
     </div>
   );
