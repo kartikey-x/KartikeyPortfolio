@@ -1,1188 +1,878 @@
 /**
- * @license
- * SPDX-License-Identifier: Apache-2.0
+ * ╔═══════════════════════════════════════════════════════════╗
+ * ║   KARTIKEY SINGH — Spatial Resume v2                      ║
+ * ║   Concept: Navigable stellar universe. Each section is    ║
+ * ║   a planet orbiting the developer's identity core.        ║
+ * ║   Navigation triggers a warp-speed star-streak jump.      ║
+ * ║   Master-developer level motion & interaction.            ║
+ * ╚═══════════════════════════════════════════════════════════╝
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence, useInView, useMotionValueEvent, MotionValue } from "motion/react";
+import React, {
+  useEffect, useRef, useState, useCallback, ReactNode,
+} from "react";
 import {
-  Cpu,
-  Code2,
-  Globe,
-  Mail,
-  Github,
-  Linkedin,
-  ExternalLink,
-  ChevronRight,
-  Terminal,
-  Layers,
-  Zap,
-  Monitor,
-  Sparkles,
-  ArrowUpRight,
-  ArrowRight,
-  Braces,
-  Database,
-  Network,
-  Menu,
-  X,
+  motion, AnimatePresence, useMotionValue, useSpring,
+} from "motion/react";
+import {
+  Code2, Globe, Mail, Github, Linkedin, ExternalLink,
+  Terminal, Cpu, Sparkles, Network, ArrowUpRight,
+  ChevronLeft, MapPin,
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import { Button } from "@/src/components/ui/button";
-import { Card, CardContent } from "@/src/components/ui/card";
 
-// ─── TOUCH DEVICE DETECTION ───
-function useIsTouchDevice() {
-  const [isTouch, setIsTouch] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(pointer: coarse)");
-    setIsTouch(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsTouch(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return isTouch;
-}
-
-// ─── USER DATA ───
-const USER_DATA = {
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const ME = {
   name: "Kartikey Singh",
+  handle: "@kartikey_x",
   role: "AI/ML Engineer & Full-Stack Developer",
-  bio: "B.Tech CSE student specializing in Artificial Intelligence and Machine Learning. Experienced in building Python-based tools and robust web applications with a focus on RESTful architectures and data-driven systems.",
-  profileImage: "/profile.png",
-  hardware: {
-    primary: "MackBook Pro M4",
-    specs: "Optimized for AI/ML Workloads",
-    description: "Configured for local model training, data analysis using NumPy/Pandas, and full-stack backend development."
-  },
-  skillCategories: [
-    {
-      category: "Languages",
-      icon: <Code2 className="w-5 h-5" />,
-      color: "from-blue-500/20 to-blue-600/5",
-      accent: "bg-blue-400/80",
-      items: ["Python", "C", "C++", "Java"],
-    },
-    {
-      category: "Core CS",
-      icon: <Cpu className="w-5 h-5" />,
-      color: "from-purple-500/20 to-purple-600/5",
-      accent: "bg-purple-400/80",
-      items: ["Data Structures & Algorithms", "Object-Oriented Programming", "DBMS", "Operating Systems"],
-    },
-    {
-      category: "Tools & Platforms",
-      icon: <Terminal className="w-5 h-5" />,
-      color: "from-cyan-500/20 to-cyan-600/5",
-      accent: "bg-cyan-400/80",
-      items: ["Git", "GitHub", "VS Code", "Google Colab"],
-    },
-    {
-      category: "Web & Backend",
-      icon: <Globe className="w-5 h-5" />,
-      color: "from-emerald-500/20 to-emerald-600/5",
-      accent: "bg-emerald-400/80",
-      items: ["HTML", "CSS", "Backend Basics", "REST APIs"],
-    },
-    {
-      category: "AI / ML Track",
-      icon: <Sparkles className="w-5 h-5" />,
-      color: "from-orange-500/20 to-orange-600/5",
-      accent: "bg-orange-400/80",
-      items: ["Machine Learning", "Neural Networks", "NLP", "Computer Vision"],
-    },
-    {
-      category: "Networking",
-      icon: <Network className="w-5 h-5" />,
-      color: "from-rose-500/20 to-rose-600/5",
-      accent: "bg-rose-400/80",
-      items: ["Network Protocols", "Configuration", "Troubleshooting", "Technical Documentation"],
-    },
+  bio: "B.Tech CSE student specializing in Artificial Intelligence & Machine Learning. I build Python-based tools, robust web applications, and data-driven systems. Currently exploring the frontier of neural networks and language models.",
+  image: "/profile.png",
+  machine: "MacBook Pro M4",
+  machineNote: "Optimized for AI/ML workloads",
+  stats: [
+    { n: "80+", label: "Problems Solved" },
+    { n: "3+",  label: "Years Coding"    },
+    { n: "3",   label: "Projects Shipped"},
   ],
   skills: [
-    { name: "Python", icon: <Code2 className="w-5 h-5" />, level: "Primary", desc: "Core language for AI/ML & scripting" },
-    { name: "C / C++", icon: <Terminal className="w-5 h-5" />, level: "Proficient", desc: "Systems & competitive programming" },
-    { name: "Java", icon: <Braces className="w-5 h-5" />, level: "Proficient", desc: "OOP and academic coursework" },
-    { name: "DSA & OOP", icon: <Cpu className="w-5 h-5" />, level: "Strong", desc: "80+ problems on LeetCode & HackerRank" },
-    { name: "Git & GitHub", icon: <Network className="w-5 h-5" />, level: "Daily Use", desc: "Version control & open-source" },
-    { name: "AI / ML", icon: <Sparkles className="w-5 h-5" />, level: "Specialising", desc: "B.Tech AI/ML track, Google Colab" },
+    { cat: "Languages",  icon: "code",  tags: ["Python", "C", "C++", "Java"]                                 },
+    { cat: "Core CS",    icon: "cpu",   tags: ["DSA", "OOP", "DBMS", "Operating Systems"]                    },
+    { cat: "Tools",      icon: "term",  tags: ["Git", "GitHub", "VS Code", "Google Colab"]                   },
+    { cat: "Web & API",  icon: "globe", tags: ["HTML", "CSS", "Flask", "REST APIs"]                          },
+    { cat: "AI / ML",    icon: "spark", tags: ["Machine Learning", "Neural Networks", "NLP", "CV"]           },
+    { cat: "Networks",   icon: "net",   tags: ["Protocols", "Configuration", "Docs", "Troubleshooting"]      },
   ],
   projects: [
     {
-      title: "NotaLink",
-      desc: "A web-based academic note-sharing portal featuring REST API endpoints for secure file management and subject-based categorization.",
+      id: "notalink", num: "01", title: "NotaLink", year: "2025",
+      desc: "Academic note-sharing portal with REST API endpoints for secure file management and subject-based categorization.",
       tech: ["Flask", "SQLite", "JavaScript", "REST"],
-      link: "https://github.com/kartikey-x/NotaLink",
-      featured: true,
-      year: "2025",
-      number: "01"
+      url: "https://github.com/kartikey-x/NotaLink",
+      h: 43, sat: 80, lit: 65,
     },
     {
-      title: "StegoSafe",
-      desc: "An advanced information-hiding tool utilizing LSB steganography to securely embed and extract data within image payloads.",
-      tech: ["Python", "Steganography", "Security"],
-      link: "https://github.com/kartikey-x/StegoSafe-OpenInnovation",
-      year: "2026",
-      number: "02"
+      id: "stego", num: "02", title: "StegoSafe", year: "2026",
+      desc: "LSB steganography tool that embeds and extracts hidden data inside image payloads with zero perceptual change.",
+      tech: ["Python", "Steganography", "PIL", "Security"],
+      url: "https://github.com/kartikey-x/StegoSafe-OpenInnovation",
+      h: 210, sat: 80, lit: 68,
     },
     {
-      title: "ExamPrepBuddy",
-      desc: "A modular CLI-based study optimization tool that automates plan organization and tracks completion metrics across multiple subjects.",
-      tech: ["Python", "File I/O", "Modular Design"],
-      link: "https://github.com/kartikey-x/ExamPreparationBuddy",
-      year: "2025",
-      number: "03"
-    }
+      id: "buddy", num: "03", title: "ExamPrepBuddy", year: "2025",
+      desc: "Modular CLI study-optimization tool automating plan organization and multi-subject completion tracking.",
+      tech: ["Python", "File I/O", "Modular Design", "CLI"],
+      url: "https://github.com/kartikey-x/ExamPreparationBuddy",
+      h: 160, sat: 70, lit: 62,
+    },
   ],
   contact: {
     email: "kartikeysingh2007@gmail.com",
     socials: [
-      { name: "GitHub", icon: <Github className="w-5 h-5" />, link: "https://github.com/kartikey-singh" },
-      { name: "LinkedIn", icon: <Linkedin className="w-5 h-5" />, link: "https://linkedin.com/in/kartikey-singh" },
-      { name: "Instagram", icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-          <circle cx="12" cy="12" r="4"/>
-          <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/>
-        </svg>
-      ), link: "https://instagram.com/unclaimedheat" },
-      { name: "Twitter", icon: (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-        </svg>
-      ), link: "https://twitter.com/@kartikey_x_" },
-    ]
-  }
+      { label: "GitHub",   url: "https://github.com/kartikey-x",         icon: "gh" },
+      { label: "LinkedIn", url: "https://linkedin.com/in/kartikey-singh", icon: "li" },
+      { label: "Twitter",  url: "https://twitter.com/@kartikey_x_",       icon: "tw" },
+    ],
+  },
 };
 
-// ─── CUSTOM CURSOR (only rendered on non-touch devices) ───
-function CustomCursor() {
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
-  const followerX = useMotionValue(-100);
-  const followerY = useMotionValue(-100);
-  const [isHovering, setIsHovering] = useState(false);
+type Section = "home" | "about" | "projects" | "skills" | "contact";
 
-  const x = useSpring(cursorX, { damping: 25, stiffness: 280 });
-  const y = useSpring(cursorY, { damping: 25, stiffness: 280 });
-  const fx = useSpring(followerX, { damping: 18, stiffness: 100 });
-  const fy = useSpring(followerY, { damping: 18, stiffness: 100 });
+const NAV: Array<{
+  id: Exclude<Section, "home">;
+  label: string;
+  sub: string;
+  angle: number;
+  orbitR: number;
+  color: string;
+  rgb: string;
+  period: number;
+}> = [
+  { id: "about",    label: "About",    sub: "Who I am",        angle: -75,  orbitR: 225, color: "#dca842", rgb: "220,168,66",  period: 12 },
+  { id: "projects", label: "Projects", sub: "What I've built", angle: 15,   orbitR: 260, color: "#60a5fa", rgb: "96,165,250",  period: 18 },
+  { id: "skills",   label: "Skills",   sub: "What I know",     angle: 105,  orbitR: 235, color: "#f472b6", rgb: "244,114,182", period: 22 },
+  { id: "contact",  label: "Contact",  sub: "Let's connect",   angle: 200,  orbitR: 250, color: "#34d399", rgb: "52,211,153",  period: 15 },
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HOOKS
+// ═══════════════════════════════════════════════════════════════════════════
+function useTouch() {
+  const [t, setT] = useState(false);
+  useEffect(() => {
+    const mq = matchMedia("(pointer:coarse)");
+    setT(mq.matches);
+    const h = (e: MediaQueryListEvent) => setT(e.matches);
+    mq.addEventListener("change", h);
+    return () => mq.removeEventListener("change", h);
+  }, []);
+  return t;
+}
+
+function useClock() {
+  const [d, setD] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setD(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return d;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STARFIELD CANVAS
+// ═══════════════════════════════════════════════════════════════════════════
+function StarField({ warp }: { warp: boolean }) {
+  const cvs = useRef<HTMLCanvasElement>(null);
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
+  const warpRef = useRef(warp);
+  useEffect(() => { warpRef.current = warp; }, [warp]);
 
   useEffect(() => {
-    let currentHoverState = false;
+    const canvas = cvs.current!;
+    const ctx = canvas.getContext("2d")!;
+    const mob = matchMedia("(pointer:coarse)").matches;
+    let W = 0, H = 0, raf = 0, t = 0;
+    let warpP = 0; // warp progress 0–1
 
-    const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX - 6);
-      cursorY.set(e.clientY - 6);
-      followerX.set(e.clientX - 24);
-      followerY.set(e.clientY - 24);
+    interface Star {
+      x: number; y: number; z: number; pz: number;
+      sz: number; spd: number; lum: number; warm: number;
+    }
+    const N = mob ? 140 : 300;
+    const stars: Star[] = [];
 
-      const target = e.target as HTMLElement;
-      const isHoverable = !!target.closest('a, button, [role="button"], .magnetic-area');
-      
-      if (isHoverable !== currentHoverState) {
-        currentHoverState = isHoverable;
-        setIsHovering(isHoverable);
+    const mk = (): Star => ({
+      x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2,
+      z: Math.random(), pz: 1,
+      sz: 0.4 + Math.random() * 1.4, spd: 0.0003 + Math.random() * 0.0009,
+      lum: 0.4 + Math.random() * 0.6, warm: Math.random(),
+    });
+
+    const resize = () => {
+      const dpr = mob ? 1 : Math.min(devicePixelRatio, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    for (let i = 0; i < N; i++) stars.push(mk());
+    resize();
+    window.addEventListener("resize", resize);
+
+    const onMove = (e: MouseEvent) => { mouseRef.current = { x: e.clientX / W, y: e.clientY / H }; };
+    !mob && window.addEventListener("mousemove", onMove, { passive: true });
+
+    const draw = () => {
+      t += 0.016;
+      warpP = warpRef.current ? Math.min(1, warpP + 0.09) : Math.max(0, warpP - 0.065);
+
+      ctx.fillStyle = warpP > 0.05 ? `rgba(9,8,7,${0.14 + warpP * 0.1})` : "rgba(9,8,7,0.2)";
+      ctx.fillRect(0, 0, W, H);
+
+      const mx = (mouseRef.current.x - 0.5) * 0.03;
+      const my = (mouseRef.current.y - 0.5) * 0.03;
+      const speedMult = 1 + warpP * 28;
+
+      for (const s of stars) {
+        s.pz = s.z;
+        s.z -= s.spd * speedMult;
+        if (s.z <= 0.001) { Object.assign(s, mk()); s.z = 0.95 + Math.random() * 0.05; s.pz = s.z; continue; }
+
+        const sx = ((s.x - mx) / s.z) * 0.5 + 0.5;
+        const sy = ((s.y - my) / s.z) * 0.5 + 0.5;
+        const px = ((s.x - mx) / s.pz) * 0.5 + 0.5;
+        const py = ((s.y - my) / s.pz) * 0.5 + 0.5;
+        const sX = sx * W, sY = sy * H, pX = px * W, pY = py * H;
+        const depth = 1 - s.z;
+        const size = s.sz * depth * 3.5;
+        const alpha = s.lum * Math.min(1, depth * 1.8);
+        const r = Math.round(242 + s.warm * 13);
+        const g2 = Math.round(228 + s.warm * 7);
+        const b = Math.round(200 + s.warm * 17);
+
+        if (warpP > 0.08) {
+          const dx = sX - pX, dy = sY - pY, len = Math.sqrt(dx * dx + dy * dy);
+          if (len > 0.5) {
+            ctx.beginPath(); ctx.moveTo(pX, pY); ctx.lineTo(sX, sY);
+            ctx.strokeStyle = `rgba(${r},${g2},${b},${alpha * 0.85})`;
+            ctx.lineWidth = Math.max(0.3, size * 0.4);
+            ctx.stroke();
+          }
+        } else {
+          if (size > 1.5) {
+            const grd = ctx.createRadialGradient(sX, sY, 0, sX, sY, size * 3);
+            grd.addColorStop(0, `rgba(${r},${g2},${b},${alpha * 0.55})`);
+            grd.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(sX, sY, size * 3, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.beginPath(); ctx.arc(sX, sY, Math.max(0.1, size), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r},${g2},${b},${alpha})`; ctx.fill();
+        }
       }
-    };
 
-    window.addEventListener("mousemove", moveCursor, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", moveCursor);
+      // Nebulas
+      for (const nb of [
+        { x: 0.12, y: 0.18, r: 400, rgb: "220,168,66", a: 0.022 + 0.007 * Math.sin(t * 0.35) },
+        { x: 0.88, y: 0.76, r: 340, rgb: "96,165,250", a: 0.016 + 0.005 * Math.sin(t * 0.27) },
+        { x: 0.50, y: 0.92, r: 280, rgb: "52,211,153", a: 0.013 + 0.004 * Math.sin(t * 0.48) },
+      ]) {
+        const g3 = ctx.createRadialGradient(nb.x * W, nb.y * H, 0, nb.x * W, nb.y * H, nb.r);
+        g3.addColorStop(0, `rgba(${nb.rgb},${nb.a})`); g3.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g3; ctx.fillRect(0, 0, W, H);
+      }
+      raf = requestAnimationFrame(draw);
     };
-  }, [cursorX, cursorY, followerX, followerY]);
+    draw();
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+      !mob && window.removeEventListener("mousemove", onMove);
+    };
+  }, []);
+
+  return <canvas ref={cvs} className="fixed inset-0 -z-10" style={{ background: "#090807" }} />;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CUSTOM CURSOR
+// ═══════════════════════════════════════════════════════════════════════════
+function Cursor() {
+  const cx = useMotionValue(-200), cy = useMotionValue(-200);
+  const fx = useSpring(useMotionValue(-200), { stiffness: 200, damping: 26, mass: 0.4 });
+  const fy = useSpring(useMotionValue(-200), { stiffness: 200, damping: 26, mass: 0.4 });
+  const [hot, setHot] = useState(false);
+  const [clicking, setClicking] = useState(false);
+
+  useEffect(() => {
+    const mv = (e: MouseEvent) => {
+      cx.set(e.clientX); cy.set(e.clientY);
+      fx.set(e.clientX); fy.set(e.clientY);
+      setHot(!!(e.target as Element)?.closest("a,button,[data-hover]"));
+    };
+    const md = () => setClicking(true);
+    const mu = () => setClicking(false);
+    window.addEventListener("mousemove", mv, { passive: true });
+    window.addEventListener("mousedown", md);
+    window.addEventListener("mouseup", mu);
+    return () => {
+      window.removeEventListener("mousemove", mv);
+      window.removeEventListener("mousedown", md);
+      window.removeEventListener("mouseup", mu);
+    };
+  }, [cx, cy, fx, fy]);
 
   return (
     <>
-      <motion.div
-        className="custom-cursor"
-        style={{ x, y }}
-        animate={{ scale: isHovering ? 0.1 : 1 }}
-      />
-      <motion.div
-        className="custom-cursor-follower"
-        style={{ x: fx, y: fy }}
-        animate={{
-          scale: isHovering ? 2.5 : 1,
-          borderColor: isHovering ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.15)"
-        }}
-      />
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-9999"
+        style={{ x: cx, y: cy, translateX: "-50%", translateY: "-50%" }}
+        animate={{ scale: clicking ? 0.3 : hot ? 0.25 : 1 }} transition={{ duration: 0.12 }}>
+        <div className="w-2.5 h-2.5 rounded-full bg-white mix-blend-difference" />
+      </motion.div>
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-9998"
+        style={{ x: fx, y: fy, translateX: "-50%", translateY: "-50%" }}
+        animate={{ scale: clicking ? 0.85 : hot ? 2 : 1 }} transition={{ duration: 0.22 }}>
+        <motion.div className="w-9 h-9 rounded-full border"
+          animate={{ borderColor: hot ? "rgba(220,168,66,0.7)" : "rgba(255,255,255,0.18)" }}
+          transition={{ duration: 0.3 }} />
+      </motion.div>
     </>
   );
 }
 
-// ─── MAGNETIC WRAPPER (disabled on touch) ───
-function Magnetic({ children, className, strength = 0.35 }: { children: React.ReactNode; className?: string; strength?: number }) {
+// ═══════════════════════════════════════════════════════════════════════════
+// MAGNETIC BUTTON
+// ═══════════════════════════════════════════════════════════════════════════
+function Magnetic({ children, strength = 0.3, className }: { children: ReactNode; strength?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isTouch = useIsTouchDevice();
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { damping: 30, stiffness: 300 });
-  const springY = useSpring(y, { damping: 30, stiffness: 300 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isTouch || !ref.current) return;
-    const { clientX, clientY } = e;
-    const { left, top, width, height } = ref.current.getBoundingClientRect();
-    x.set((clientX - left - width / 2) * strength);
-    y.set((clientY - top - height / 2) * strength);
+  const x = useMotionValue(0), y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 350, damping: 30, mass: 0.5 });
+  const sy = useSpring(y, { stiffness: 350, damping: 30, mass: 0.5 });
+  const onMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    x.set((e.clientX - r.left - r.width / 2) * strength);
+    y.set((e.clientY - r.top - r.height / 2) * strength);
   };
-
-  const handleMouseLeave = () => { x.set(0); y.set(0); };
-
-  if (isTouch) {
-    return <div className={cn("magnetic-area", className)}>{children}</div>;
-  }
-
   return (
-    <motion.div ref={ref} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
-      style={{ x: springX, y: springY }} className={cn("magnetic-area", className)}>
+    <motion.div ref={ref} style={{ x: sx, y: sy }} onMouseMove={onMove}
+      onMouseLeave={() => { x.set(0); y.set(0); }} className={className}>
       {children}
     </motion.div>
   );
 }
 
-// ─── TEXT SPLIT REVEAL ───
-function SplitText({ children, className, delay = 0 }: { children: string; className?: string; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
-  const words = children.split(" ");
-
+// ═══════════════════════════════════════════════════════════════════════════
+// FADE-UP REVEAL
+// ═══════════════════════════════════════════════════════════════════════════
+function Up({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
   return (
-    <div ref={ref} className={cn("flex flex-wrap", className)}>
-      {words.map((word, i) => (
-        <span key={i} className="overflow-hidden inline-block mr-[0.3em]">
-          <motion.span
-            className="inline-block"
-            initial={{ y: "120%", rotateX: 90 }}
-            animate={isInView ? { y: 0, rotateX: 0 } : {}}
-            transition={{
-              duration: 0.8,
-              delay: delay + i * 0.04,
-              ease: [0.16, 1, 0.3, 1]
-            }}
-          >
-            {word}
-          </motion.span>
-        </span>
-      ))}
-    </div>
-  );
-}
-
-// ─── CHAR-BY-CHAR REVEAL ───
-function CharReveal({ children, className, delay = 0 }: { children: string; className?: string; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-
-  return (
-    <div ref={ref} className={cn("inline-flex flex-wrap", className)}>
-      {children.split("").map((char, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-          animate={isInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
-          transition={{
-            duration: 0.1,
-            delay: delay + i * 0.02,
-            ease: [0.16, 1, 0.3, 1]
-          }}
-          className="inline-block"
-        >
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      ))}
-    </div>
-  );
-}
-
-// ─── HORIZONTAL LINE REVEAL ───
-function LineReveal({ className, delay = 0 }: { className?: string; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-
-  return (
-    <div ref={ref} className={cn("overflow-hidden", className)}>
-      <motion.div
-        className="h-px bg-linear-to-r from-white/0 via-white/20 to-white/0"
-        initial={{ scaleX: 0, opacity: 0 }}
-        animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
-        transition={{ duration: 1.5, delay, ease: [0.16, 1, 0.3, 1] }}
-        style={{ transformOrigin: "left" }}
-      />
-    </div>
-  );
-}
-
-// ─── PARALLAX SECTION (reduced on mobile) ───
-function ParallaxSection({ children, speed = 0.1, className }: { children: React.ReactNode; speed?: number; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isTouch = useIsTouchDevice();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-  const effectiveSpeed = isTouch ? speed * 0.3 : speed;
-  const y = useTransform(scrollYProgress, [0, 1], [100 * effectiveSpeed, -100 * effectiveSpeed]);
-  const smoothY = useSpring(y, { damping: 50, stiffness: 100 });
-
-  return (
-    <div ref={ref} className={cn("relative", className)}>
-      <motion.div style={{ y: isTouch ? 0 : smoothY }}>
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── MASKED REVEAL ───
-function MaskReveal({ children, className }: { children: React.ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
-
-  return (
-    <div ref={ref} className={cn("relative", className)}>
-      <motion.div
-        initial={{ clipPath: "inset(100% 0 0 0)" }}
-        animate={isInView ? { clipPath: "inset(0% 0 0 0)" } : {}}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
-}
-
-// ─── GLITCH TEXT ───
-function GlitchText({ children, className }: { children: string; className?: string }) {
-  return (
-    <span className={cn("glitch-text relative inline-block", className)} data-text={children}>
+    <motion.div className={className}
+      initial={{ opacity: 0, y: 28, filter: "blur(4px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}>
       {children}
-    </span>
+    </motion.div>
   );
 }
 
-// ─── INTERACTIVE PARTICLE BACKGROUND (reduced on mobile) ───
-interface Particle {
-  x: number; y: number; vx: number; vy: number;
-  size: number; alpha: number; color: string;
-  life: number; maxLife: number;
+function Divider({ color = "rgba(255,255,255,0.07)" }: { color?: string }) {
+  return <div className="h-px w-full" style={{ background: `linear-gradient(90deg,transparent,${color},transparent)` }} />;
 }
 
-interface Orb {
-  x: number; y: number; baseX: number; baseY: number;
-  vx: number; vy: number; radius: number; baseRadius: number;
-  color: string; alpha: number; baseAlpha: number;
-  pulseSpeed: number; pulsePhase: number;
-  driftSpeed: number; driftAngle: number; driftRadius: number;
-  mass: number;
-}
-
-function InteractiveBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
-  const scrollRef = useRef(0);
-  const orbsRef = useRef<Orb[]>([]);
-  const particlesRef = useRef<Particle[]>([]);
-  const animationRef = useRef<number>(0);
-  const timeRef = useRef(0);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: true })!;
-
-    // Detect if touch/mobile for reduced complexity
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-
-    const orbColors = [
-      "220, 168, 66",  /* Gold */
-      "242, 235, 217", /* Champagne */
-      "180, 130, 60",  /* Soft Bronze */
-      "200, 300, 50",  /* Muted Amber */
-      "255, 245, 230", /* Warm White */
-    ];
-
-    const particleColors = [
-      "255, 245, 230",
-      "220, 168, 66",
-      "180, 130, 60",
-    ];
-
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-
-    const resize = () => {
-      const dpr = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-    };
-
-    const createOrbs = (): Orb[] => {
-      const orbs: Orb[] = [];
-      const maxCount = isMobile ? 5 : 12;
-      const count = Math.min(maxCount, Math.floor((width * height) / 100000));
-      for (let i = 0; i < count; i++) {
-        const baseRadius = isMobile ? (80 + Math.random() * 300) : (100 + Math.random() * 250);
-        orbs.push({
-          x: Math.random() * width, y: Math.random() * height,
-          baseX: Math.random() * width, baseY: Math.random() * height,
-          vx: 0, vy: 0, radius: baseRadius, baseRadius,
-          color: orbColors[i % orbColors.length],
-          alpha: 0.015 + Math.random() * 0.025,
-          baseAlpha: 0.015 + Math.random() * 0.025,
-          pulseSpeed: 0.15 + Math.random() * 0.4, pulsePhase: Math.random() * Math.PI * 2,
-          driftSpeed: 0.08 + Math.random() * 0.15, driftAngle: Math.random() * Math.PI * 2,
-          driftRadius: 30 + Math.random() * 80, mass: 0.1 + Math.random() * 1.5,
-        });
-      }
-      return orbs;
-    };
-
-    const createParticles = () => {
-      const particleCount = isMobile ? 15 : 40;
-      for (let i = 0; i < particleCount; i++) {
-        particlesRef.current.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.1) * 0.15,
-          vy: -0.05 - Math.random() * 0.15,
-          size: 0.1 + Math.random() * 1.2,
-          alpha: 0.1 + Math.random() * 0.3,
-          color: particleColors[Math.floor(Math.random() * particleColors.length)],
-          life: Math.random() * 300,
-          maxLife: 300 + Math.random() * 400,
-        });
-      }
-    };
-
-    resize();
-    orbsRef.current = createOrbs();
-    createParticles();
-
-    const onMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        mouseRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      }
-    };
-    const onTouchEnd = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
-    };
-    const onScroll = () => { scrollRef.current = window.scrollY; };
-
-    const animate = () => {
-      timeRef.current += 0.005;
-      const t = timeRef.current;
-      const mouse = mouseRef.current;
-      ctx.clearRect(0, 0, width, height);
-
-      for (const orb of orbsRef.current) {
-        const driftX = Math.cos(t * orb.driftSpeed + orb.driftAngle) * orb.driftRadius;
-        const driftY = Math.sin(t * orb.driftSpeed * 0.7 + orb.driftAngle) * orb.driftRadius;
-        const scrollOffset = scrollRef.current * 0.03;
-        let targetX = orb.baseX + driftX;
-        let targetY = orb.baseY + driftY - scrollOffset % (height * 2);
-        if (targetY < -orb.radius * 2) targetY += height + orb.radius * 4;
-
-        if (!isMobile) {
-          const dx = mouse.x - orb.x;
-          const dy = mouse.y - orb.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 500 && dist > 0) {
-            const force = (1 - dist / 500) * 40;
-            targetX += (dx / dist) * force;
-            targetY += (dy / dist) * force;
-            orb.alpha = orb.baseAlpha + (1 - dist / 500) * 0.03;
-          } else {
-            orb.alpha += (orb.baseAlpha - orb.alpha) * 0.01;
-          }
-        }
-
-        const pulse = Math.sin(t * orb.pulseSpeed + orb.pulsePhase) * 0.1 + 1;
-        orb.vx += (targetX - orb.x) * 0.004;
-        orb.vy += (targetY - orb.y) * 0.004;
-        orb.vx *= 0.97; orb.vy *= 0.97;
-        orb.x += orb.vx; orb.y += orb.vy;
-
-        const gradient = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius * pulse);
-        gradient.addColorStop(0, `rgba(${orb.color}, ${orb.alpha * 2})`);
-        gradient.addColorStop(0.4, `rgba(${orb.color}, ${orb.alpha * 0.1})`);
-        gradient.addColorStop(1, `rgba(${orb.color}, 0)`);
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, orb.radius * pulse, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-      }
-
-      for (let i = particlesRef.current.length - 1; i >= 0; i--) {
-        const p = particlesRef.current[i];
-        p.life++;
-        if (p.life > p.maxLife) {
-          p.x = Math.random() * width;
-          p.y = height + 10;
-          p.life = 0;
-          continue;
-        }
-        const lifeRatio = p.life / p.maxLife;
-        const fade = lifeRatio > 0.8 ? 1 - ((lifeRatio - 0.8) / 0.2) : Math.min(1, p.life / 30);
-        p.x += p.vx; p.y += p.vy;
-        if (p.y < -10) p.y = height + 10;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${p.color}, ${p.alpha * fade})`;
-        ctx.fill();
-      }
-
-      if (!isMobile && mouse.x > 0) {
-        // Reduced size from 250 radius to 150 radius, drastically reducing pixel fill rate
-        const glow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 150);
-        glow.addColorStop(0, `rgba(220, 168, 66, 0.03)`); 
-        glow.addColorStop(1, `rgba(0, 0, 0, 0)`);
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 150, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
-    window.addEventListener("scroll", onScroll, { passive: true });
-    const onResize = () => { resize(); orbsRef.current = createOrbs(); };
-    window.addEventListener("resize", onResize);
-    animationRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="fixed inset-0 -z-10 pointer-events-none" />;
-}
-
-// ─── SCROLL VELOCITY TEXT ───
-function ScrollVelocityText({ text, className }: { text: string; className?: string }) {
-  const { scrollY } = useScroll();
-  const baseX = useMotionValue(0);
-  const velocity = useRef(0);
-  const direction = useRef(1);
-  const prevScroll = useRef(0);
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const diff = latest - prevScroll.current;
-    direction.current = diff > 0 ? -1 : 1;
-    velocity.current = Math.min(Math.abs(diff) * 0.1, 50);
-    prevScroll.current = latest;
-  });
-
-  useEffect(() => {
-    let raf: number;
-    const animate = () => {
-      let moveBy = direction.current * Math.max(0.045, velocity.current * 0.02);
-      let currentX = baseX.get() + moveBy;
-
-      if (currentX <= -50) {
-        currentX += 50;
-      } else if (currentX >= 0) {
-        currentX -= 50;
-      }
-
-      baseX.set(currentX);
-      velocity.current *= 0.95;
-      raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, [baseX]);
+// ═══════════════════════════════════════════════════════════════════════════
+// PLANET ORB
+// ═══════════════════════════════════════════════════════════════════════════
+function Planet({ item, onClick, index }: { item: typeof NAV[number]; onClick: () => void; index: number }) {
+  const [hov, setHov] = useState(false);
+  const rad = (item.angle * Math.PI) / 180;
 
   return (
-    <div className={cn("overflow-hidden whitespace-nowrap flex", className)}>
-      <motion.div className="flex gap-8 md:gap-16 pr-8 md:pr-16 will-change-transform" style={{ x: useMotionTemplate`${baseX}%` }}>
-        {[...Array(8)].map((_, i) => (
-          <span key={i} className="text-[14vw] md:text-[12vw] font-black uppercase tracking-tighter text-white/3 select-none">
-            {text}
-          </span>
-        ))}
+    <motion.button data-hover onClick={onClick}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      className="absolute flex flex-col items-center gap-2.5"
+      style={{
+        left: "50%", top: "50%",
+        translateX: `calc(${Math.cos(rad) * item.orbitR}px - 50%)`,
+        translateY: `calc(${Math.sin(rad) * item.orbitR}px - 50%)`,
+      }}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.7, delay: 0.4 + index * 0.12, ease: [0.34, 1.56, 0.64, 1] }}
+      whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.94 }}
+    >
+      <motion.div
+        className="relative w-22 h-22 rounded-full flex items-center justify-center"
+        animate={{
+          boxShadow: hov
+            ? `0 0 0 1px ${item.color}60,0 0 50px rgba(${item.rgb},0.45),0 0 90px rgba(${item.rgb},0.15)`
+            : `0 0 0 1px ${item.color}20,0 0 25px rgba(${item.rgb},0.15)`,
+        }}
+        transition={{ duration: 0.4 }}
+        style={{ background: `radial-gradient(ellipse at 38% 32%,${item.color}28 0%,${item.color}08 55%,transparent 85%)` }}
+      >
+        {/* Pulsing core */}
+        <motion.div className="w-8 h-8 rounded-full"
+          style={{ background: `radial-gradient(circle,${item.color}90 0%,${item.color}25 65%,transparent 100%)` }}
+          animate={{ scale: hov ? [1, 1.35, 1] : [1, 1.08, 1], opacity: hov ? 1 : 0.6 }}
+          transition={{ duration: hov ? 0.7 : 2.5, repeat: Infinity, ease: "easeInOut" }} />
+        {/* Orbiting moon */}
+        <motion.div className="absolute inset-0 rounded-full"
+          animate={{ rotate: 360 }} transition={{ duration: item.period, repeat: Infinity, ease: "linear" }}>
+          <div className="absolute w-2.5 h-2.5 rounded-full"
+            style={{
+              top: "50%", left: "calc(50% + 42px)", transform: "translateY(-50%)",
+              background: item.color, boxShadow: `0 0 10px ${item.color},0 0 20px ${item.color}60`,
+            }} />
+        </motion.div>
+        {/* Hover ring */}
+        <motion.div className="absolute -inset-3 rounded-full pointer-events-none"
+          style={{ border: `1px solid ${item.color}15` }}
+          animate={{ opacity: hov ? 1 : 0, scale: hov ? 1 : 0.9 }}
+          transition={{ duration: 0.35 }} />
       </motion.div>
-    </div>
+      {/* Label */}
+      <motion.div className="flex flex-col items-center gap-0.5"
+        animate={{ opacity: hov ? 1 : 0.55 }} transition={{ duration: 0.25 }}>
+        <span className="text-sm font-bold tracking-wide" style={{ color: item.color }}>{item.label}</span>
+        <span className="text-[10px] text-white/25 leading-none">{item.sub}</span>
+      </motion.div>
+    </motion.button>
   );
 }
 
-// ─── NOISE DISTORTION LINE ───
-function DistortionLine({ className }: { className?: string }) {
-  const pathRef = useRef<SVGPathElement>(null);
-  const animRef = useRef<number>(0);
-
-  useEffect(() => {
-    let t = 0;
-    const animate = () => {
-      t += 0.015;
-      if (pathRef.current) {
-        let d = "M 0 25";
-        for (let i = 0; i <= 100; i++) {
-          const x = i * 10;
-          const y = 25 + Math.sin(i * 0.3 + t) * 3 + Math.sin(i * 0.7 + t * 1.5) * 2;
-          d += ` L ${x} ${y}`;
-        }
-        pathRef.current.setAttribute("d", d);
-      }
-      animRef.current = requestAnimationFrame(animate);
-    };
-    animRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animRef.current);
-  }, []);
+// ═══════════════════════════════════════════════════════════════════════════
+// HOME SCREEN
+// ═══════════════════════════════════════════════════════════════════════════
+function HomeScreen({ onNav, isMobile }: { onNav: (s: Section) => void; isMobile: boolean }) {
+  const clock = useClock();
 
   return (
-    <svg className={cn("w-full h-12 opacity-20", className)} viewBox="0 0 1000 50" preserveAspectRatio="none">
-      <path ref={pathRef} d="M 0 25 L 1000 25" stroke="url(#lineGrad)" strokeWidth="0.1" fill="none" />
-      <defs>
-        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="transparent" />
-          <stop offset="20%" stopColor="rgba(255,255,255,0.1)" />
-          <stop offset="50%" stopColor="rgba(120,180,255,0.8)" />
-          <stop offset="80%" stopColor="rgba(255,255,255,0.1)" />
-          <stop offset="100%" stopColor="transparent" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
+    <div className="w-full h-full flex flex-col items-center justify-center select-none">
+      {/* Status bar */}
+      <motion.div className="absolute top-0 left-0 right-0 h-10 flex items-center justify-between px-6"
+        initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+        <div className="flex items-center gap-1.5 text-white/20 text-[10px] font-mono">
+          <MapPin className="w-2.5 h-2.5" /> India · UTC+5:30
+        </div>
+        <div className="text-amber-400/50 text-[10px] font-mono tabular-nums">
+          {clock.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+        </div>
+      </motion.div>
 
-// ─── COUNTER ANIMATION ───
-function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const step = target / 60;
-    const interval = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        setCount(target);
-        clearInterval(interval);
-      } else {
-        setCount(Math.floor(start));
-      }
-    }, 16);
-    return () => clearInterval(interval);
-  }, [isInView, target]);
-
-  return <span ref={ref} className="tabular-nums">{count}{suffix}</span>;
-}
-
-// ─── OPTIMIZED COMPONENT MEMOIZATION ───
-const MemoizedBackground = React.memo(InteractiveBackground);
-const MemoizedDistortionLine = React.memo(DistortionLine);
-const MemoizedCustomCursor = React.memo(CustomCursor);
-
-// ─── MOBILE NAVIGATION MENU ───
-function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col items-center justify-center"
-        >
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            onClick={onClose}
-            className="absolute top-6 right-6 p-3 text-white/60 hover:text-white"
-            aria-label="Close menu"
-          >
-            <X className="w-6 h-6" />
-          </motion.button>
-
-          <nav className="flex flex-col items-center gap-2">
-            {["home", "projects", "skills", "contact"].map((section, i) => (
-              <motion.button
-                key={section}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ delay: 0.1 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
-                onClick={() => {
-                  onClose();
-                  setTimeout(() => {
-                    document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-                  }, 300);
+      {isMobile ? (
+        <div className="w-full px-6 flex flex-col items-center gap-6">
+          <Up delay={0.1} className="flex flex-col items-center gap-2">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full overflow-hidden"
+                style={{ boxShadow: "0 0 0 1.5px rgba(220,168,66,0.4),0 0 30px rgba(220,168,66,0.15)" }}>
+                <img src={ME.image} alt="" className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-green-400"
+                style={{ border: "2.5px solid #090807" }} />
+            </div>
+            <div className="text-center">
+              <h1 className="text-3xl font-black text-white leading-none">
+                {ME.name.split(" ")[0]} <span className="text-amber-400">{ME.name.split(" ")[1]}</span>
+              </h1>
+              <p className="text-white/30 text-[10px] font-mono tracking-widest uppercase mt-1.5">{ME.role}</p>
+            </div>
+          </Up>
+          <Up delay={0.25} className="grid grid-cols-2 gap-2.5 w-full max-w-xs">
+            {NAV.map((item) => (
+              <motion.button key={item.id} data-hover onClick={() => onNav(item.id)}
+                className="flex flex-col gap-1.5 p-4 rounded-2xl text-left"
+                style={{
+                  background: `radial-gradient(ellipse at 30% 30%,rgba(${item.rgb},0.12) 0%,rgba(255,255,255,0.02) 70%)`,
+                  border: `1px solid rgba(${item.rgb},0.2)`,
                 }}
-                className="text-3xl font-bold uppercase tracking-[0.15em] text-white/70 hover:text-white py-4 px-8 transition-colors"
-              >
-                {section}
+                whileTap={{ scale: 0.93 }}>
+                <span className="text-sm font-bold" style={{ color: item.color }}>{item.label}</span>
+                <span className="text-[9px] text-white/25 leading-tight">{item.sub}</span>
               </motion.button>
             ))}
-          </nav>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
-// ─── ISOLATED NAVIGATION COMPONENT ───
-function Navigation() {
-  const [activeSection, setActiveSection] = useState("home");
-  const [navScrolled, setNavScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setNavScrolled(latest > 100);
-  });
-
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileMenuOpen]);
-
-  return (
-    <>
-      <MobileMenu isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-700",
-          navScrolled ? "py-3 md:py-4 bg-transparent" : "py-5 md:py-8"
-        )}
-      >
-        <div className="max-w-7xl mx-auto px-5 md:px-8 flex items-center justify-between">
-          <motion.div
-            className="text-sm font-mono tracking-widest text-white/60"
-            whileHover={{ color: "rgba(255,255,255,0.9)" }}
-          >
-            KS.
-          </motion.div>
-
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-1">
-            {["home", "projects", "skills", "contact"].map((section, i) => (
-              <Magnetic key={section} strength={0.2}>
-                <motion.button
-                  initial={{ y: -30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.6 + i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  onClick={() => {
-                    setActiveSection(section);
-                    document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className={cn(
-                    "px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 rounded-full relative",
-                    activeSection === section
-                      ? "text-white"
-                      : "text-white/40 hover:text-white/70"
-                  )}
-                >
-                  {activeSection === section && (
-                    <motion.div
-                      layoutId="navIndicator"
-                      className="absolute inset-0 bg-white/8 border border-white/12 rounded-full"
-                      transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    />
-                  )}
-                  <span className="relative z-10">{section}</span>
-                </motion.button>
-              </Magnetic>
+          </Up>
+          <Up delay={0.4} className="flex gap-5">
+            {ME.stats.map((s, i) => (
+              <div key={i} className="text-center">
+                <div className="text-xl font-black text-white">{s.n}</div>
+                <div className="text-[9px] text-white/25 uppercase tracking-widest">{s.label}</div>
+              </div>
             ))}
-          </div>
-
-          {/* Mobile hamburger */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden p-2 text-white/60 hover:text-white"
-            aria-label="Open menu"
-          >
-            <Menu className="w-6 h-6" />
-          </motion.button>
+          </Up>
         </div>
-      </motion.nav>
-    </>
-  );
-}
+      ) : (
+        <div className="relative" style={{ width: 580, height: 580 }}>
+          {/* Orbit rings */}
+          {[200, 235, 265].map((r, i) => (
+            <div key={i} className="absolute rounded-full pointer-events-none"
+              style={{ width: r * 2, height: r * 2, top: "50%", left: "50%",
+                transform: "translate(-50%,-50%)", border: "1px solid rgba(255,255,255,0.025)" }} />
+          ))}
+          {/* Identity core */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-3">
+            <Up delay={0.1}>
+              <Magnetic strength={0.12}>
+                <motion.div className="relative" whileHover={{ scale: 1.04 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 28 }}>
+                  <motion.div className="w-22 h-22 rounded-full overflow-hidden"
+                    animate={{ boxShadow: [
+                      "0 0 0 2px rgba(220,168,66,0.25),0 0 30px rgba(220,168,66,0.1)",
+                      "0 0 0 2px rgba(220,168,66,0.45),0 0 50px rgba(220,168,66,0.2)",
+                      "0 0 0 2px rgba(220,168,66,0.25),0 0 30px rgba(220,168,66,0.1)",
+                    ] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                    <img src={ME.image} alt="" className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        el.parentElement!.style.background = "rgba(220,168,66,0.12)";
+                        el.style.display = "none";
+                      }} />
+                  </motion.div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full"
+                    style={{ background: "#22c55e", border: "2.5px solid #090807" }} />
+                </motion.div>
+              </Magnetic>
+            </Up>
+            <Up delay={0.2} className="text-center">
+              <h1 className="text-2xl font-black text-white leading-tight whitespace-nowrap">
+                {ME.name.split(" ")[0]} <span className="text-amber-400">{ME.name.split(" ")[1]}</span>
+              </h1>
+              <p className="text-white/30 text-[9px] font-mono tracking-widest uppercase mt-1">{ME.role}</p>
+            </Up>
+            <Up delay={0.3} className="flex items-center gap-3">
+              {ME.stats.map((s, i) => (
+                <React.Fragment key={i}>
+                  <div className="text-center">
+                    <div className="text-base font-black text-white leading-none">{s.n}</div>
+                    <div className="text-[8px] text-white/22 uppercase tracking-widest mt-0.5">{s.label}</div>
+                  </div>
+                  {i < ME.stats.length - 1 && <div className="w-px h-7 bg-white/8" />}
+                </React.Fragment>
+              ))}
+            </Up>
+          </div>
+          {/* Planets */}
+          {NAV.map((item, i) => (
+            <Planet key={item.id} item={item} onClick={() => onNav(item.id)} index={i} />
+          ))}
+        </div>
+      )}
 
-// // ─── HELPER COMPONENT: CANVAS NODE ───
-function CanvasNode({ children, x, y, title }: { children: React.ReactNode; x: number; y: number; title: string }) {
-  return (
-    <div 
-      className="absolute flex flex-col items-center justify-center"
-      style={{ 
-        left: `calc(50% + ${x}px)`, 
-        top: `calc(50% + ${y}px)`, 
-        transform: "translate(-50%, -50%)" 
-      }}
-    >
-      <div className="mb-6 flex items-center gap-3 opacity-50 bg-[#0d0c0b]/50 px-4 py-2 rounded-full border border-white/5 backdrop-blur-md">
-        <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-        <span className="text-[10px] uppercase tracking-[0.4em] font-mono text-white/70">
-          {title} // {x}, {y}
-        </span>
-      </div>
-      <div className="pointer-events-auto" onPointerDownCapture={(e) => e.stopPropagation()}>
-        {children}
-      </div>
+      <motion.p className="absolute bottom-6 text-white/12 text-[10px] font-mono tracking-widest"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}>
+        {isMobile ? "tap a planet to explore" : "click any planet · esc to return home"}
+      </motion.p>
     </div>
   );
 }
 
-// ─── HELPER: MAP DATA STREAMS ───
-function NetworkLines({ nodes }: { nodes: any }) {
+// ═══════════════════════════════════════════════════════════════════════════
+// PANEL SHELL
+// ═══════════════════════════════════════════════════════════════════════════
+function Panel({ children, accentColor, accentRgb, onBack, label }: {
+  children: ReactNode; accentColor: string; accentRgb: string; onBack: () => void; label: string;
+}) {
   return (
-    <svg className="absolute top-1/2 left-1/2 w-3000 h-3000 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-60 z-0">
-      {/* Center of the 12000px SVG is 6000, 6000 */}
-      <g transform="translate(6000, 6000)">
-        <MapPath from={nodes.home} to={nodes.about} />
-        <MapPath from={nodes.home} to={nodes.projects} />
-        <MapPath from={nodes.about} to={nodes.skills} />
-        <MapPath from={nodes.projects} to={nodes.contact} />
-        <MapPath from={nodes.skills} to={nodes.contact} />
-        {/* The hidden red line to the secret terminal */}
-        <MapPath from={nodes.home} to={nodes.secret} isSecret />
-      </g>
-    </svg>
+    <motion.div className="w-full h-full flex flex-col"
+      initial={{ opacity: 0, scale: 0.96, y: 24 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97, y: -16 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+      {/* Top bar */}
+      <motion.div className="flex items-center justify-between px-6 md:px-10 pt-6 pb-3 shrink-0"
+        initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <Magnetic strength={0.2}>
+          <motion.button data-hover onClick={onBack}
+            className="flex items-center gap-1.5 text-xs font-mono px-4 py-2 rounded-full"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.45)" }}
+            whileHover={{ background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.8)", scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}>
+            <ChevronLeft className="w-3.5 h-3.5" /> Home
+          </motion.button>
+        </Magnetic>
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full" style={{ background: accentColor }} />
+          <span className="text-[10px] font-mono tracking-widest uppercase" style={{ color: `${accentColor}80` }}>{label}</span>
+        </div>
+      </motion.div>
+      {/* Accent line */}
+      <motion.div className="h-px mx-6 md:mx-10 mb-1"
+        style={{ background: `linear-gradient(90deg,transparent,rgba(${accentRgb},0.3),transparent)` }}
+        initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.8, delay: 0.2 }} />
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6" style={{ scrollbarWidth: "thin" }}>
+        {children}
+      </div>
+      {/* Bottom nav dots */}
+      <motion.div className="flex justify-center gap-2.5 py-4 shrink-0"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
+        {NAV.map((n) => (
+          <div key={n.id} className="w-1.5 h-1.5 rounded-full"
+            style={{ background: n.color, opacity: n.color === accentColor ? 1 : 0.2 }} />
+        ))}
+      </motion.div>
+    </motion.div>
   );
 }
 
-function MapPath({ from, to, isSecret }: { from: any; to: any; isSecret?: boolean }) {
-  const path = `M ${from.x} ${from.y} L ${to.x} ${to.y}`;
-  const color = isSecret ? "rgba(239, 68, 68, 0.4)" : "rgba(220,168,66,0.3)";
-  const dashColor = isSecret ? "rgba(239, 68, 68, 0.8)" : "rgba(220,168,66,0.8)";
-  
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION: ABOUT
+// ═══════════════════════════════════════════════════════════════════════════
+function AboutPanel({ onBack }: { onBack: () => void }) {
   return (
-    <>
-      <path d={path} stroke={color} strokeWidth="2" fill="none" />
-      <path d={path} stroke={dashColor} strokeWidth="3" fill="none" strokeDasharray={isSecret ? "10 40" : "15 30"}>
-        <animate attributeName="stroke-dashoffset" from="100" to="0" dur={isSecret ? "4s" : "2s"} repeatCount="indefinite" />
-      </path>
-    </>
+    <Panel accentColor="#dca842" accentRgb="220,168,66" onBack={onBack} label="about.sys">
+      <div className="max-w-xl mx-auto flex flex-col gap-7">
+        <Up delay={0.1}>
+          <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
+            The human<br /><span style={{ color: "#dca842" }}>behind the code.</span>
+          </h2>
+        </Up>
+        <Up delay={0.2}>
+          <p className="text-white/45 text-base md:text-lg leading-relaxed">{ME.bio}</p>
+        </Up>
+        <Divider color="rgba(220,168,66,0.12)" />
+        <Up delay={0.3}>
+          <div className="px-5 py-4 rounded-2xl font-mono text-xs"
+            style={{ background: "rgba(220,168,66,0.04)", border: "1px solid rgba(220,168,66,0.1)" }}>
+            <div className="text-amber-400/30 mb-2 text-[10px]">// system info</div>
+            {([["machine", ME.machine], ["config", ME.machineNote], ["status", "● active · open to work"], ["location", "India · Remote-friendly"]] as [string, string][]).map(([k, v]) => (
+              <div key={k} className="flex items-baseline gap-2 mb-0.5">
+                <span className="text-amber-400/50 w-16 shrink-0">{k}</span>
+                <span className="text-white/20 shrink-0">›</span>
+                <span className={k === "status" ? "text-emerald-400/80" : "text-white/45"}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </Up>
+        <Up delay={0.4}>
+          <div className="grid grid-cols-3 gap-2.5">
+            {ME.stats.map((s, i) => (
+              <motion.div key={i} className="flex flex-col items-center py-5 rounded-2xl gap-1"
+                style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.04)" }}
+                whileHover={{ borderColor: "rgba(220,168,66,0.2)", background: "rgba(220,168,66,0.04)" }}>
+                <span className="text-3xl font-black text-white">{s.n}</span>
+                <span className="text-[9px] uppercase tracking-widest text-white/22">{s.label}</span>
+              </motion.div>
+            ))}
+          </div>
+        </Up>
+      </div>
+    </Panel>
   );
 }
 
-// ─── MAIN SPATIAL OS APPLICATION ───
-export default function App() {
-  const [mounted, setMounted] = useState(false);
-  const isTouch = useIsTouchDevice();
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Puzzle State
-  const [passcode, setPasscode] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
-  
-  // Universal Camera Coordinates
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  useEffect(() => {
-    setMounted(true);
-    const existing = document.querySelector('meta[name="viewport"]');
-    if (!existing) {
-      const meta = document.createElement('meta');
-      meta.name = 'viewport';
-      meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
-      document.head.appendChild(meta);
-    }
-  }, []);
-
-  // Trackpad & Mouse Wheel Native Panning
-  const handleWheel = (e: React.WheelEvent) => {
-    // Multiply delta for faster, smoother trackpad tracking
-    const newX = x.get() - e.deltaX * 1.5;
-    const newY = y.get() - e.deltaY * 1.5;
-    
-    // Clamp the coordinates so the user can't scroll off into the infinite void
-    x.set(Math.max(-4000, Math.min(4000, newX)));
-    y.set(Math.max(-4000, Math.min(4000, newY)));
-  };
-
-  const nodes = {
-    home: { x: 0, y: 0, label: "Origin" },
-    about: { x: -1600, y: -1000, label: "Hardware" },
-    projects: { x: 1600, y: -800, label: "Archive" },
-    skills: { x: -1200, y: 1200, label: "Stack" },
-    contact: { x: 1400, y: 1400, label: "Comms" },
-    secret: { x: 0, y: -2400, label: "Classified" }
-  };
-
-  const mapScale = 200 / 12000; 
-  const dotX = useTransform(x, (val) => 100 - (val * mapScale));
-  const dotY = useTransform(y, (val) => 100 - (val * mapScale));
-
-  // High-Speed Camera Flight (Radar Dock)
-  const flyTo = (targetX: number, targetY: number) => {
-    animate(x, -targetX, { type: "spring", damping: 30, stiffness: 120, mass: 0.5 });
-    animate(y, -targetY, { type: "spring", damping: 30, stiffness: 120, mass: 0.5 });
-  };
-
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION: PROJECTS
+// ═══════════════════════════════════════════════════════════════════════════
+function ProjectsPanel({ onBack }: { onBack: () => void }) {
+  const [open, setOpen] = useState<string | null>(null);
   return (
-    <div 
-      onWheel={handleWheel}
-      className="relative w-screen h-screen overflow-hidden bg-[#0d0c0b] text-[#f2ebd9] selection:bg-amber-500/30"
-    >
-      {!isTouch && <MemoizedCustomCursor />}
-      <div className="grain" />
-      <MemoizedBackground />
-
-      {/* ─── HUD OVERLAYS ─── */}
-      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-50 pointer-events-none">
-        <h1 className="text-xl md:text-2xl font-bold tracking-widest text-amber-500">KS.</h1>
-        <p className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-white/40 mt-1">Spatial OS // Live</p>
+    <Panel accentColor="#60a5fa" accentRgb="96,165,250" onBack={onBack} label="projects/">
+      <div className="max-w-xl mx-auto flex flex-col gap-7">
+        <Up delay={0.1}>
+          <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
+            Things I've<br /><span style={{ color: "#60a5fa" }}>shipped.</span>
+          </h2>
+        </Up>
+        <div className="flex flex-col gap-3">
+          {ME.projects.map((p, i) => {
+            const isOpen = open === p.id;
+            const c = `hsl(${p.h},${p.sat}%,${p.lit}%)`;
+            const rgba = (a: number) => `hsla(${p.h},${p.sat}%,${p.lit}%,${a})`;
+            return (
+              <Up key={p.id} delay={0.15 + i * 0.1}>
+                <motion.div data-hover onClick={() => setOpen(isOpen ? null : p.id)}
+                  className="rounded-2xl overflow-hidden cursor-pointer"
+                  animate={{ background: isOpen ? rgba(0.07) : "rgba(255,255,255,0.022)", borderColor: isOpen ? rgba(0.35) : "rgba(255,255,255,0.05)" }}
+                  style={{ border: "1px solid rgba(255,255,255,0.05)" }}
+                  whileHover={{ background: rgba(0.05), borderColor: rgba(0.22), scale: 1.008 }}
+                  whileTap={{ scale: 0.997 }} transition={{ duration: 0.25 }}>
+                  <div className="flex items-center gap-4 p-5">
+                    <span className="text-5xl font-black font-mono leading-none select-none" style={{ color: rgba(0.12) }}>{p.num}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-bold text-white leading-tight">{p.title}</h3>
+                      <span className="text-xs text-white/25 font-mono">{p.year}</span>
+                    </div>
+                    <motion.div animate={{ rotate: isOpen ? 45 : 0 }}
+                      transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}>
+                      <ArrowUpRight className="w-5 h-5" style={{ color: isOpen ? c : "rgba(255,255,255,0.18)" }} />
+                    </motion.div>
+                  </div>
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="overflow-hidden">
+                        <div className="px-5 pb-5">
+                          <div className="h-px mb-4" style={{ background: `linear-gradient(90deg,transparent,${rgba(0.25)},transparent)` }} />
+                          <p className="text-white/45 text-sm leading-relaxed mb-4">{p.desc}</p>
+                          <div className="flex flex-wrap gap-1.5 mb-4">
+                            {p.tech.map((t) => (
+                              <span key={t} className="px-2.5 py-0.5 rounded-lg text-[10px] font-mono"
+                                style={{ background: rgba(0.09), border: `1px solid ${rgba(0.2)}`, color: c }}>
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                          <Magnetic strength={0.15}>
+                            <a href={p.url} target="_blank" rel="noopener noreferrer" data-hover
+                              className="inline-flex items-center gap-2 text-xs font-mono py-2 px-4 rounded-xl transition-all"
+                              style={{ background: rgba(0.1), border: `1px solid ${rgba(0.3)}`, color: c }}
+                              onClick={(e) => e.stopPropagation()}>
+                              View on GitHub <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </Magnetic>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              </Up>
+            );
+          })}
+        </div>
       </div>
+    </Panel>
+  );
+}
 
-      <div className="absolute top-6 right-6 md:top-8 md:right-8 z-50 flex items-center gap-2 pointer-events-none text-white/30 text-[9px] md:text-[10px] font-mono">
-        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-        <span className="hidden sm:inline">Trackpad / Drag to Explore</span>
-        <span className="sm:hidden">Drag to Explore</span>
-      </div>
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION: SKILLS
+// ═══════════════════════════════════════════════════════════════════════════
+const ICONS: Record<string, ReactNode> = {
+  code:  <Code2 className="w-4 h-4" />,   cpu:   <Cpu className="w-4 h-4" />,
+  term:  <Terminal className="w-4 h-4" />, globe: <Globe className="w-4 h-4" />,
+  spark: <Sparkles className="w-4 h-4" />, net:   <Network className="w-4 h-4" />,
+};
 
-      {/* ─── RADAR NAVIGATION DOCK ─── */}
-      <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
-        <div className="flex items-center gap-1 md:gap-2 p-2 rounded-full bg-[#0d0c0b]/80 backdrop-blur-xl border border-amber-500/15 shadow-[0_0_30px_rgba(220,168,66,0.05)]">
-          {Object.entries(nodes).filter(([key]) => key !== 'secret').map(([key, data]) => (
-            <Magnetic key={key} strength={0.1}>
-              <button
-                onClick={() => flyTo(data.x, data.y)}
-                className="px-4 py-2.5 md:px-6 md:py-3 rounded-full text-[9px] md:text-xs uppercase tracking-widest font-medium text-white/50 hover:text-amber-400 hover:bg-amber-500/10 transition-all duration-300"
-              >
-                {data.label}
-              </button>
-            </Magnetic>
+function SkillsPanel({ onBack }: { onBack: () => void }) {
+  const [hov, setHov] = useState<number | null>(null);
+  return (
+    <Panel accentColor="#f472b6" accentRgb="244,114,182" onBack={onBack} label="neural_stack">
+      <div className="max-w-xl mx-auto flex flex-col gap-7">
+        <Up delay={0.1}>
+          <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
+            What's in<br /><span style={{ color: "#f472b6" }}>my arsenal.</span>
+          </h2>
+        </Up>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {ME.skills.map((s, i) => (
+            <Up key={i} delay={0.15 + i * 0.07}>
+              <motion.div data-hover onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
+                className="p-4 rounded-2xl"
+                animate={{
+                  background: hov === i ? "rgba(244,114,182,0.07)" : "rgba(255,255,255,0.025)",
+                  borderColor: hov === i ? "rgba(244,114,182,0.3)" : "rgba(255,255,255,0.05)",
+                }}
+                style={{ border: "1px solid rgba(255,255,255,0.05)" }}
+                transition={{ duration: 0.25 }}>
+                <div className="flex items-center gap-2 mb-3 text-pink-400/65">
+                  {ICONS[s.icon]}
+                  <span className="text-[10px] font-mono tracking-widest uppercase">{s.cat}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {s.tags.map((tag, j) => (
+                    <motion.span key={j}
+                      initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.2 + i * 0.04 + j * 0.03 }}
+                      className="px-2.5 py-1 rounded-full text-[11px]"
+                      style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.5)" }}>
+                      {tag}
+                    </motion.span>
+                  ))}
+                </div>
+              </motion.div>
+            </Up>
           ))}
         </div>
       </div>
-
-      {/* ─── LIVE RADAR (MINIMAP) ─── */}
-      <div className="absolute bottom-8 right-8 w-50 h-50 bg-[#0d0c0b]/80 border border-white/10 rounded-2xl backdrop-blur-md overflow-hidden pointer-events-none hidden lg:block shadow-[0_0_30px_rgba(0,0,0,0.8)] z-50">
-        <div className="absolute inset-0 opacity-[0.15] bg-[linear-gradient(rgba(220,168,66,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(220,168,66,0.5)_1px,transparent_1px)] bg-size-[20px_20px]" />
-        
-        {Object.entries(nodes).map(([key, data]) => (
-          <div 
-            key={key} 
-            className={`absolute w-2 h-2 rounded-full -ml-1 -mt-1 ${key === 'secret' ? 'bg-red-500 animate-ping' : 'bg-amber-500'}`} 
-            style={{ left: 100 + data.x * mapScale, top: 100 + data.y * mapScale }} 
-          />
-        ))}
-
-        <motion.div 
-          className="absolute w-12 h-8 border border-amber-400 bg-amber-400/10 shadow-[0_0_15px_rgba(220,168,66,0.4)] -ml-6 -mt-4 will-change-transform" 
-          style={{ left: dotX, top: dotY }} 
-        />
-        
-        <div className="absolute top-2 left-2 text-[8px] font-mono tracking-widest text-amber-500/50 uppercase">Live_Radar</div>
-      </div>
-
-      {/* ─── THE UNIVERSAL CANVAS ─── */}
-      <motion.div
-        ref={containerRef}
-        drag
-        dragConstraints={{ left: -4000, right: 4000, top: -4000, bottom: 4000 }}
-        dragElastic={0.1}
-        style={{ x, y }}
-        className="absolute top-1/2 left-1/2 w-3000 h-3000 -translate-x-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing will-change-transform"
-      >
-        <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(rgba(220,168,66,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(220,168,66,0.5)_1px,transparent_1px)] bg-size-[100px_100px] pointer-events-none" />
-
-        <NetworkLines nodes={nodes} />
-
-        {/* ════════ NODE 1: ORIGIN ════════ */}
-        <CanvasNode x={nodes.home.x} y={nodes.home.y} title="Origin_Profile">
-          <div className="w-[90vw] md:w-175 p-8 md:p-14 rounded-[2rem] md:rounded-[3rem] bg-[#0d0c0b]/60 border border-amber-500/10 shadow-[0_0_80px_rgba(220,168,66,0.03)] backdrop-blur-xl flex flex-col items-center text-center group hover:border-amber-500/30 transition-colors duration-700 relative">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/5 mb-8 relative">
-               <img src={USER_DATA.profileImage} alt="Kartikey" className="w-full h-full object-cover grayscale-[0.2] contrast-[1.1] group-hover:grayscale-0 transition-all duration-700" />
-               <div className="absolute inset-0 bg-linear-to-tr from-amber-500/20 to-transparent mix-blend-overlay" />
-            </div>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 text-white">{USER_DATA.name}</h2>
-            <p className="text-amber-500 font-mono text-[10px] md:text-xs tracking-[0.3em] uppercase mb-6">{USER_DATA.role}</p>
-            <p className="text-white/40 leading-relaxed text-sm md:text-base max-w-lg mb-10">{USER_DATA.bio}</p>
-            <button 
-              onClick={(e) => { e.stopPropagation(); flyTo(nodes.projects.x, nodes.projects.y); }}
-              className="flex items-center gap-3 px-8 py-4 bg-white/5 text-white border border-white/10 text-xs uppercase tracking-[0.2em] font-semibold rounded-full hover:bg-amber-500 hover:text-[#0d0c0b] hover:border-amber-500 transition-all duration-300"
-            >
-              Initialize Archive <ArrowRight className="w-4 h-4" />
-            </button>
-
-            {/* The Upgraded Puzzle Clue (More visible, pulsing) */}
-            <div className="absolute bottom-5 right-8 text-[10px] md:text-xs opacity-30 animate-pulse font-mono tracking-widest text-red-500 hover:opacity-100 transition-opacity cursor-help">
-              SYS_PIN: 0451
-            </div>
-          </div>
-        </CanvasNode>
-
-        {/* ════════ NODE 2: HARDWARE ════════ */}
-        <CanvasNode x={nodes.about.x} y={nodes.about.y} title="Sys_Hardware">
-          <div className="w-[85vw] md:w-125 p-8 md:p-12 rounded-[2rem] bg-[#0d0c0b]/80 border border-white/5 backdrop-blur-xl hover:border-amber-500/20 transition-all duration-500">
-            <Monitor className="w-12 h-12 md:w-16 md:h-16 text-amber-500/50 mb-8" />
-            <h3 className="text-2xl md:text-3xl font-bold mb-3">{USER_DATA.hardware.primary}</h3>
-            <p className="text-amber-400/60 font-mono text-xs md:text-sm mb-6">{USER_DATA.hardware.specs}</p>
-            <p className="text-white/40 text-sm leading-relaxed mb-8">{USER_DATA.hardware.description}</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/5">
-                <p className="text-3xl md:text-4xl font-bold text-white mb-2">80+</p>
-                <p className="text-[9px] uppercase tracking-[0.2em] text-white/30">Problems Solved</p>
-              </div>
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/5">
-                <p className="text-3xl md:text-4xl font-bold text-white mb-2">3+</p>
-                <p className="text-[9px] uppercase tracking-[0.2em] text-white/30">Years Coding</p>
-              </div>
-            </div>
-          </div>
-        </CanvasNode>
-
-        {/* ════════ NODE 3: ARCHIVE ════════ */}
-        <CanvasNode x={nodes.projects.x} y={nodes.projects.y} title="Data_Archive">
-          <div className="w-[90vw] md:w-225 grid md:grid-cols-2 gap-6">
-            {USER_DATA.projects.map((project, i) => (
-              <a 
-                key={i} 
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-8 md:p-10 rounded-[2rem] bg-[#0d0c0b]/80 border border-white/5 backdrop-blur-xl hover:border-amber-500/40 hover:bg-white/2 transition-all duration-500 group block"
-              >
-                <div className="text-5xl md:text-6xl font-black text-white/5 mb-6 group-hover:text-amber-500/10 transition-colors font-mono">{project.number}</div>
-                <h3 className="text-xl md:text-2xl font-bold mb-3 flex items-center justify-between text-white/90 group-hover:text-amber-400 transition-colors">
-                  {project.title}
-                  <ExternalLink className="w-5 h-5 text-white/20 group-hover:text-amber-400 transition-colors" />
-                </h3>
-                <p className="text-white/40 text-sm leading-relaxed mb-8">{project.desc}</p>
-                <div className="flex gap-2 flex-wrap">
-                  {project.tech.map(t => (
-                    <span key={t} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[9px] tracking-[0.2em] uppercase text-white/50 group-hover:border-amber-500/30 group-hover:text-amber-200 transition-colors">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </a>
-            ))}
-          </div>
-        </CanvasNode>
-
-        {/* ════════ NODE 4: STACK ════════ */}
-        <CanvasNode x={nodes.skills.x} y={nodes.skills.y} title="Neural_Network">
-          <div className="w-[90vw] md:w-175 p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] bg-[#0d0c0b]/80 border border-white/5 backdrop-blur-xl">
-             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {USER_DATA.skillCategories.map((cat, i) => (
-                <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-amber-500/20 transition-colors">
-                  <div className="flex items-center gap-3 mb-4 text-white/60">
-                    {cat.icon}
-                    <span className="text-[10px] uppercase tracking-widest font-mono text-amber-500/80">{cat.category}</span>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    {cat.items.map((item, j) => (
-                      <span key={j} className="text-sm text-white/50">{item}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CanvasNode>
-
-        {/* ════════ NODE 5: COMMS ════════ */}
-        <CanvasNode x={nodes.contact.x} y={nodes.contact.y} title="Comms_Link">
-          <div className="w-[85vw] md:w-125 p-10 md:p-14 rounded-[2rem] md:rounded-[3rem] bg-[#0d0c0b]/80 border border-amber-500/20 shadow-[0_0_50px_rgba(220,168,66,0.05)] backdrop-blur-xl text-center flex flex-col items-center">
-            <Mail className="w-12 h-12 text-amber-500 mb-6" />
-            <h3 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Let's Build.</h3>
-            <p className="text-white/40 mb-10 text-sm md:text-base">Secure channel open for collaborations and opportunities.</p>
-            
-            <a href={`mailto:${USER_DATA.contact.email}`} className="text-lg md:text-xl font-light text-white/60 hover:text-amber-400 transition-colors mb-12 border-b border-amber-500/30 pb-2">
-              {USER_DATA.contact.email}
-            </a>
-
-            <div className="flex justify-center gap-4">
-              {USER_DATA.contact.socials.map((social, i) => (
-                <a 
-                  key={i} 
-                  href={social.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-4 rounded-full bg-white/5 border border-white/10 text-white/40 hover:bg-amber-500 hover:text-[#0d0c0b] hover:border-amber-500 transition-all duration-300"
-                >
-                  {social.icon}
-                </a>
-              ))}
-            </div>
-          </div>
-        </CanvasNode>
-
-        {/* ════════ NODE 6: CLASSIFIED TERMINAL ════════ */}
-        <CanvasNode x={nodes.secret.x} y={nodes.secret.y} title="Classified_Terminal">
-          <div className="w-[85vw] md:w-125 p-8 md:p-12 rounded-[2rem] bg-[#050505] border-2 border-red-500/30 shadow-[0_0_50px_rgba(239,68,68,0.1)] backdrop-blur-xl text-center font-mono">
-            {!unlocked ? (
-              <form onSubmit={(e) => { e.preventDefault(); if(passcode === "0451") setUnlocked(true); }}>
-                <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-6">
-                  <Terminal className="w-6 h-6 text-red-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-red-500 mb-2">SYSTEM LOCKED</h3>
-                <p className="text-white/40 text-xs mb-8">Access to unrestricted data requires Level 4 Clearance PIN. (Hint: Check Origin)</p>
-                
-                <input 
-                  type="text" 
-                  maxLength={4}
-                  value={passcode}
-                  onChange={(e) => setPasscode(e.target.value)}
-                  placeholder="____"
-                  className="w-full bg-[#0d0c0b] border border-red-500/30 rounded-lg p-4 text-center text-2xl tracking-[1em] text-red-500 outline-none focus:border-red-500 transition-colors mb-4"
-                />
-                <button type="submit" className="w-full py-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-black font-bold uppercase tracking-widest rounded-lg transition-all">
-                  Decrypt
-                </button>
-              </form>
-            ) : (
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-6">
-                  <Zap className="w-6 h-6 text-emerald-500" />
-                </div>
-                <h3 className="text-2xl font-bold text-emerald-500 mb-4">ACCESS GRANTED</h3>
-                <p className="text-white/60 text-sm mb-8 leading-relaxed">Easter Egg Unlocked! You successfully deciphered the map and traced the corrupted data line.</p>
-                <a href="#" className="inline-block w-full py-4 bg-emerald-500 text-black font-bold uppercase tracking-widest rounded-lg hover:bg-emerald-400 transition-colors">
-                  Download Classified Resume
-                </a>
-              </motion.div>
-            )}
-          </div>
-        </CanvasNode>
-
-      </motion.div>
-    </div>
+    </Panel>
   );
 }
 
-function animate(x: MotionValue<number>, arg1: number, arg2: { type: string; damping: number; stiffness: number; mass: number; }) {
-  throw new Error("Function not implemented.");
+// ═══════════════════════════════════════════════════════════════════════════
+// SECTION: CONTACT
+// ═══════════════════════════════════════════════════════════════════════════
+const SOCIAL_ICONS: Record<string, ReactNode> = {
+  gh: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>,
+  li: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>,
+  tw: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>,
+};
+
+function ContactPanel({ onBack }: { onBack: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(ME.contact.email); setCopied(true); setTimeout(() => setCopied(false), 2200); } catch (_) {}
+  };
+  return (
+    <Panel accentColor="#34d399" accentRgb="52,211,153" onBack={onBack} label="comms.link">
+      <div className="max-w-xl mx-auto flex flex-col gap-7">
+        <Up delay={0.1}>
+          <h2 className="text-4xl md:text-5xl font-black text-white leading-[1.05] tracking-tight">
+            Let's build<br /><span style={{ color: "#34d399" }}>something real.</span>
+          </h2>
+        </Up>
+        <Up delay={0.2}>
+          <p className="text-white/40 text-base leading-relaxed">
+            Available for internships, research collaborations, and interesting problems. I read every message and reply within 24 hours.
+          </p>
+        </Up>
+        <Divider color="rgba(52,211,153,0.12)" />
+        <Up delay={0.3}>
+          <Magnetic strength={0.12}>
+            <motion.button data-hover onClick={copy}
+              className="w-full flex items-center justify-between px-6 py-5 rounded-2xl"
+              style={{ background: "rgba(52,211,153,0.05)", border: "1px solid rgba(52,211,153,0.18)" }}
+              whileHover={{ scale: 1.02, borderColor: "rgba(52,211,153,0.35)" }} whileTap={{ scale: 0.98 }}>
+              <div className="flex flex-col items-start gap-0.5 text-left">
+                <span className="text-[9px] font-mono uppercase tracking-widest text-emerald-400/40">Email</span>
+                <span className="text-sm md:text-base font-mono text-white/65">{ME.contact.email}</span>
+              </div>
+              <AnimatePresence mode="wait">
+                {copied ? (
+                  <motion.div key="ok" initial={{ opacity: 0, y: 8, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }}
+                    className="text-xs text-emerald-400 font-mono flex items-center gap-1.5">
+                    <motion.div className="w-4 h-4 rounded-full bg-emerald-400/20 flex items-center justify-center text-emerald-400"
+                      initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 20 }}>✓</motion.div>
+                    Copied
+                  </motion.div>
+                ) : (
+                  <motion.span key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="text-[10px] text-white/25 font-mono">click to copy</motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </Magnetic>
+        </Up>
+        <Up delay={0.4}>
+          <div className="flex gap-3">
+            {ME.contact.socials.map((s, i) => (
+              <Magnetic key={i} strength={0.2} className="flex-1">
+                <motion.a href={s.url} target="_blank" rel="noopener noreferrer" data-hover
+                  className="flex flex-col items-center gap-2 py-5 w-full rounded-2xl"
+                  style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.3)" }}
+                  whileHover={{ background: "rgba(52,211,153,0.07)", borderColor: "rgba(52,211,153,0.3)", color: "#34d399", scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }} transition={{ duration: 0.22 }}>
+                  {SOCIAL_ICONS[s.icon]}
+                  <span className="text-[10px] font-mono">{s.label}</span>
+                </motion.a>
+              </Magnetic>
+            ))}
+          </div>
+        </Up>
+        <Up delay={0.5}>
+          <div className="flex items-center gap-3 px-5 py-3 rounded-xl"
+            style={{ background: "rgba(34,197,94,0.05)", border: "1px solid rgba(34,197,94,0.14)" }}>
+            <motion.div className="w-2 h-2 rounded-full bg-green-400 shrink-0"
+              animate={{ scale: [1, 1.6, 1], opacity: [1, 0.45, 1] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }} />
+            <span className="text-green-400/65 text-xs font-mono">Currently available · Open to new opportunities</span>
+          </div>
+        </Up>
+      </div>
+    </Panel>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ROOT
+// ═══════════════════════════════════════════════════════════════════════════
+export default function App() {
+  const [section, setSection] = useState<Section>("home");
+  const [warp, setWarp] = useState(false);
+  const isTouch = useTouch();
+
+  const navigate = useCallback((to: Section) => {
+    if (to === section) return;
+    setWarp(true);
+    setTimeout(() => setSection(to), to === "home" ? 120 : 200);
+    setTimeout(() => setWarp(false), 700);
+  }, [section]);
+
+  const goHome = useCallback(() => navigate("home"), [navigate]);
+
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if (e.key === "Escape" && section !== "home") goHome(); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [section, goHome]);
+
+  const tint: Record<Section, string> = {
+    home: "rgba(0,0,0,0)", about: "rgba(220,168,66,0.018)",
+    projects: "rgba(96,165,250,0.018)", skills: "rgba(244,114,182,0.018)", contact: "rgba(52,211,153,0.018)",
+  };
+
+  const panels: Record<Section, ReactNode> = {
+    home:     <HomeScreen onNav={navigate} isMobile={isTouch} />,
+    about:    <AboutPanel    onBack={goHome} />,
+    projects: <ProjectsPanel onBack={goHome} />,
+    skills:   <SkillsPanel   onBack={goHome} />,
+    contact:  <ContactPanel  onBack={goHome} />,
+  };
+
+  return (
+    <div className="fixed inset-0 overflow-hidden" style={{ fontFamily: "'Geist Variable', sans-serif" }}>
+      <StarField warp={warp} />
+      <div className="grain" />
+      <motion.div className="fixed inset-0 pointer-events-none"
+        animate={{ background: tint[section] }} transition={{ duration: 1 }} />
+      {!isTouch && <Cursor />}
+      <div className="w-full h-full">
+        <AnimatePresence mode="wait">
+          <motion.div key={section} className="w-full h-full">{panels[section]}</motion.div>
+        </AnimatePresence>
+      </div>
+      {/* Warp flash */}
+      <AnimatePresence>
+        {warp && (
+          <motion.div key="wf" className="fixed inset-0 pointer-events-none z-100"
+            initial={{ opacity: 0 }} animate={{ opacity: [0, 0.22, 0.08, 0] }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, times: [0, 0.1, 0.4, 1] }}
+            style={{ background: "radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.2) 0%,rgba(255,255,255,0.02) 60%,transparent 100%)" }} />
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
