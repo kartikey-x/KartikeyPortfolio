@@ -91,7 +91,14 @@
     @apply font-sans bg-[#0d0c0b];
     scroll-snap-type: y mandatory;
     overscroll-behavior-y: none; 
-    scroll-behavior: auto !important; /* Forces instant snapping so 3D springs handle the visuals */
+    scroll-behavior: auto !important; 
+    
+    /* NEW: Forces the hardware to instantly map finger movement to scroll, killing lag */
+    touch-action: pan-y;
+    
+    /* NEW: Kills accidental "double-tap to zoom" that enlarges the screen on iPhones */
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
   }
   
   body {
