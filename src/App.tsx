@@ -838,6 +838,7 @@ function Navigation() {
 }
 
 // ─── THE HYPER-SPATIAL Z-DRIVE ENGINE (v3: High Performance 60FPS) ───
+// ─── THE HYPER-SPATIAL Z-DRIVE ENGINE (v4: Mobile Optimized) ───
 function ZDriveLayer({ children, index, total = 5, id, className }: { children: React.ReactNode; index: number; total?: number; id?: string; className?: string }) {
   const { scrollYProgress } = useScroll();
   const isTouch = useIsTouchDevice();
@@ -849,13 +850,20 @@ function ZDriveLayer({ children, index, total = 5, id, className }: { children: 
   const linger = index * step + (step * 0.15); 
   const exit = index * step + step;      
 
-  // Hardware-accelerated properties only (z, opacity, rotateX, scale)
-  const z = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? -3000 : -3500, 0, 0, isTouch ? 500 : 3000]);
-  const opacity = useTransform(scrollYProgress, [enter + (step * 0.15), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
-  const rotateX = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? 15 : 45, 0, 0, isTouch ? -15 : -45]);
+  // 1. FIXED SENSITIVITY: 
+  // Desktop still travels 3500px. Mobile now only travels 800px. 
+  // Less distance to travel = lightning-fast scroll sensitivity on touch devices.
+  const z = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? -800 : -3500, 0, 0, isTouch ? 300 : 3000]);
   
-  // Replaced the expensive GPU blur with a cheap 2D scale to simulate entering/leaving focus
-  const scale = useTransform(scrollYProgress, [enter, land, linger, exit], [0.8, 1, 1, 1.2]);
+  // 2. FIXED ENLARGEMENT: 
+  // Desktop scales to 1 (100%). Mobile lands at 0.92 (92%) to guarantee it perfectly fits the narrow viewport without clipping.
+  const scale = useTransform(scrollYProgress, [enter, land, linger, exit], [0.8, isTouch ? 0.92 : 1, isTouch ? 0.92 : 1, isTouch ? 1.05 : 1.2]);
+  
+  // 3. FIXED CLIPPING:
+  // Reduced the tilt angle on mobile from 45deg to 10deg so the corners don't fly off the screen.
+  const rotateX = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? 10 : 45, 0, 0, isTouch ? -10 : -45]);
+  
+  const opacity = useTransform(scrollYProgress, [enter + (step * 0.15), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
 
   const smoothZ = useSpring(z, { damping: 25, stiffness: 300, mass: 0.1 });
   const smoothOpacity = useSpring(opacity, { damping: 25, stiffness: 300, mass: 0.1 });
@@ -881,7 +889,6 @@ function ZDriveLayer({ children, index, total = 5, id, className }: { children: 
         pointerEvents: isActive ? "auto" : "none",
         transformOrigin: "center center",
       }}
-      // will-change: transform, opacity tells the GPU to pre-allocate memory
       className="absolute inset-0 flex items-center justify-center w-full h-full will-change-[transform,opacity] transform-style-3d px-5 md:px-8"
     >
       <div className={cn("w-full max-w-7xl mx-auto", className)}>
