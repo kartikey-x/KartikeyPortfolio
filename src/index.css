@@ -80,38 +80,23 @@
       cursor: none !important;
     }
   }
-  body {
-    background: #0d0c0b; /* Updated to Obsidian */
-    color: #f2ebd9;      /* Updated to Champagne */
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  html {
-    @apply font-sans bg-[#0d0c0b];
-    scroll-snap-type: y mandatory;
-    overscroll-behavior-y: none; 
-    scroll-behavior: auto !important; 
-    
-    /* NEW: Forces the hardware to instantly map finger movement to scroll, killing lag */
-    touch-action: pan-y;
-    
-    /* NEW: Kills accidental "double-tap to zoom" that enlarges the screen on iPhones */
-    text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%;
-  }
   
-  body {
+  /* ── Spatial Canvas Strict Lock ── */
+  html, body {
     background: #0d0c0b;
     color: #f2ebd9;
-    overflow-x: hidden;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* ABSOLUTELY NO SCROLLING */
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    touch-action: none; /* Prevents mobile browser pull-to-refresh and zooming */
   }
+  
   ::selection {
-    background: rgba(220, 168, 66, 0.25); /* Gold selection */
+    background: rgba(220, 168, 66, 0.25);
     color: white;
   }
 }
