@@ -846,24 +846,21 @@ function ZDriveLayer({ children, index, total = 5, id, className }: { children: 
 
   const step = 1 / Math.max(1, total - 1); 
   const enter = index * step - step;     
-  const land = index * step;            
+  
+  // THE 65% SNAP: It finishes its 3D movement when you are only 65% of the way down the track
+  const land = enter + (step * 0.65);            
+  
+  // It lingers perfectly still in the center through the rest of the scroll, until you push past it
   const linger = index * step + (step * 0.15); 
   const exit = index * step + step;      
 
-  // 1. FIXED SENSITIVITY: 
-  // Desktop still travels 3500px. Mobile now only travels 800px. 
-  // Less distance to travel = lightning-fast scroll sensitivity on touch devices.
+  // Hardware-accelerated properties (keep these exactly the same)
   const z = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? -800 : -3500, 0, 0, isTouch ? 300 : 3000]);
-  
-  // 2. FIXED ENLARGEMENT: 
-  // Desktop scales to 1 (100%). Mobile lands at 0.92 (92%) to guarantee it perfectly fits the narrow viewport without clipping.
   const scale = useTransform(scrollYProgress, [enter, land, linger, exit], [0.8, isTouch ? 0.92 : 1, isTouch ? 0.92 : 1, isTouch ? 1.05 : 1.2]);
-  
-  // 3. FIXED CLIPPING:
-  // Reduced the tilt angle on mobile from 45deg to 10deg so the corners don't fly off the screen.
   const rotateX = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? 10 : 45, 0, 0, isTouch ? -10 : -45]);
   
-  const opacity = useTransform(scrollYProgress, [enter + (step * 0.15), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
+  // We fade it in a bit earlier so it doesn't pop in abruptly at the 65% mark
+  const opacity = useTransform(scrollYProgress, [enter + (step * 0.10), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
 
   const smoothZ = useSpring(z, { damping: 25, stiffness: 300, mass: 0.1 });
   const smoothOpacity = useSpring(opacity, { damping: 25, stiffness: 300, mass: 0.1 });
