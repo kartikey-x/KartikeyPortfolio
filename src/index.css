@@ -88,7 +88,19 @@
     -moz-osx-font-smoothing: grayscale;
   }
   html {
-    @apply font-sans scroll-smooth;
+    @apply font-sans bg-[#0d0c0b];
+    scroll-snap-type: y mandatory;
+    overscroll-behavior-y: none; /* Stops the "bounce" effect at top and bottom */
+  }
+  
+  body {
+    background: #0d0c0b;
+    color: #f2ebd9;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   ::selection {
     background: rgba(220, 168, 66, 0.25); /* Gold selection */
