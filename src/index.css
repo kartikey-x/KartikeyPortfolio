@@ -50,24 +50,24 @@
 
 /* ── Deep, high-contrast dark palette ── */
 :root {
-    --background: #050510;
-    --foreground: #f0f0f5;
-    --card: rgba(255, 255, 255, 0.03);
-    --card-foreground: #f0f0f5;
-    --popover: rgba(10, 10, 25, 0.95);
-    --popover-foreground: #f0f0f5;
-    --primary: #e0e0e8;
-    --primary-foreground: #050510;
-    --secondary: rgba(255, 255, 255, 0.06);
-    --secondary-foreground: #c0c0cc;
-    --muted: rgba(255, 255, 255, 0.04);
-    --muted-foreground: rgba(255, 255, 255, 0.35);
-    --accent: rgba(255, 255, 255, 0.06);
-    --accent-foreground: #c0c0cc;
-    --destructive: #ff4444;
-    --border: rgba(255, 255, 255, 0.06);
-    --input: rgba(255, 255, 255, 0.08);
-    --ring: rgba(255, 255, 255, 0.2);
+    --background: #0d0c0b;
+    --foreground: #f2ebd9;
+    --card: rgba(220, 168, 66, 0.03);
+    --card-foreground: #f2ebd9;
+    --popover: rgba(13, 12, 11, 0.95);
+    --popover-foreground: #f2ebd9;
+    --primary: #dca842;
+    --primary-foreground: #0d0c0b;
+    --secondary: rgba(220, 168, 66, 0.08);
+    --secondary-foreground: #e6c57a;
+    --muted: rgba(255, 240, 220, 0.04);
+    --muted-foreground: rgba(242, 235, 217, 0.4);
+    --accent: rgba(220, 168, 66, 0.08);
+    --accent-foreground: #e6c57a;
+    --destructive: #ff5555;
+    --border: rgba(220, 168, 66, 0.15);
+    --input: rgba(220, 168, 66, 0.15);
+    --ring: rgba(220, 168, 66, 0.4);
     --radius: 0.75rem;
 }
 
@@ -75,15 +75,14 @@
   * {
     @apply border-border outline-ring/50;
   }
-  /* Only hide cursor on devices that have a fine pointer (mouse) */
   @media (pointer: fine) {
     * {
       cursor: none !important;
     }
   }
   body {
-    background: #050510;
-    color: #f0f0f5;
+    background: #0d0c0b; /* Updated to Obsidian */
+    color: #f2ebd9;      /* Updated to Champagne */
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -92,7 +91,7 @@
     @apply font-sans scroll-smooth;
   }
   ::selection {
-    background: rgba(120, 160, 255, 0.25);
+    background: rgba(220, 168, 66, 0.25); /* Gold selection */
     color: white;
   }
 }
@@ -196,6 +195,6 @@
 /* ── Canvas ── */
 canvas {
   image-rendering: auto;
-  background: radial-gradient(ellipse at 30% 20%, rgba(15, 20, 50, 1) 0%, #050510 60%),
-              radial-gradient(ellipse at 70% 80%, rgba(10, 15, 40, 1) 0%, #050510 60%);
+  background: radial-gradient(ellipse at 30% 20%, rgba(28, 24, 18, 1) 0%, #0d0c0b 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(20, 16, 12, 1) 0%, #0d0c0b 60%);
 }
