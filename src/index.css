@@ -48,26 +48,26 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ── Deep, high-contrast dark palette ── */
+/* ── Deep space palette ── */
 :root {
-    --background: #0d0c0b;
+    --background: #090807;
     --foreground: #f2ebd9;
-    --card: rgba(220, 168, 66, 0.03);
+    --card: rgba(220, 168, 66, 0.02);
     --card-foreground: #f2ebd9;
-    --popover: rgba(13, 12, 11, 0.95);
+    --popover: rgba(9, 8, 7, 0.95);
     --popover-foreground: #f2ebd9;
     --primary: #dca842;
-    --primary-foreground: #0d0c0b;
-    --secondary: rgba(220, 168, 66, 0.08);
+    --primary-foreground: #090807;
+    --secondary: rgba(220, 168, 66, 0.06);
     --secondary-foreground: #e6c57a;
-    --muted: rgba(255, 240, 220, 0.04);
-    --muted-foreground: rgba(242, 235, 217, 0.4);
-    --accent: rgba(220, 168, 66, 0.08);
+    --muted: rgba(255, 240, 220, 0.03);
+    --muted-foreground: rgba(242, 235, 217, 0.35);
+    --accent: rgba(220, 168, 66, 0.06);
     --accent-foreground: #e6c57a;
     --destructive: #ff5555;
-    --border: rgba(220, 168, 66, 0.15);
-    --input: rgba(220, 168, 66, 0.15);
-    --ring: rgba(220, 168, 66, 0.4);
+    --border: rgba(220, 168, 66, 0.1);
+    --input: rgba(220, 168, 66, 0.1);
+    --ring: rgba(220, 168, 66, 0.35);
     --radius: 0.75rem;
 }
 
@@ -75,131 +75,60 @@
   * {
     @apply border-border outline-ring/50;
   }
+
+  /* Invisible cursor — we draw our own */
   @media (pointer: fine) {
-    * {
-      cursor: none !important;
-    }
+    * { cursor: none !important; }
   }
-  
-  /* ── Spatial Canvas Strict Lock ── */
-  html, body {
-    background: #0d0c0b;
+
+  html, body, #root {
+    background: #090807;
     color: #f2ebd9;
     width: 100vw;
     height: 100vh;
-    overflow: hidden; /* ABSOLUTELY NO SCROLLING */
+    overflow: hidden;
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    touch-action: none; /* Prevents mobile browser pull-to-refresh and zooming */
+    touch-action: pan-y;
   }
-  
+
   ::selection {
-    background: rgba(220, 168, 66, 0.25);
+    background: rgba(220, 168, 66, 0.22);
     color: white;
   }
 }
 
-/* ── Custom Cursor (only on pointer devices) ── */
-.custom-cursor {
-  @apply fixed top-0 left-0 w-3 h-3 rounded-full pointer-events-none z-9999 mix-blend-difference;
-  background: white;
-  will-change: transform;
-  transform: translateZ(0);
-}
-
-.custom-cursor-follower {
-  @apply fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-9998;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  will-change: transform;
-  transform: translateZ(0);
-}
-
-/* ── Grain Overlay ── */
+/* ── Grain ── */
 .grain {
   position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  z-index: 50;
+  inset: 0;
+  z-index: 60;
   pointer-events: none;
-  opacity: 0.025;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   mix-blend-mode: overlay;
 }
 
-/* ── Magnetic Area ── */
-.magnetic-area {
-  @apply relative inline-flex items-center justify-center;
-}
-
-/* ── Glitch Text Effect ── */
-.glitch-text {
-  position: relative;
-}
-
-.glitch-text::before,
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0;
-}
-
-.glitch-text:hover::before {
-  opacity: 0.8;
-  color: #ff0040;
-  animation: glitch-1 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
-}
-
-.glitch-text:hover::after {
-  opacity: 0.8;
-  color: #0ff;
-  animation: glitch-2 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse both infinite;
-}
-
-@keyframes glitch-1 {
-  0% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, -1px); }
-  20% { clip-path: inset(92% 0 1% 0); transform: translate(1px, 2px); }
-  40% { clip-path: inset(43% 0 1% 0); transform: translate(-1px, 1px); }
-  60% { clip-path: inset(25% 0 58% 0); transform: translate(2px, -1px); }
-  80% { clip-path: inset(54% 0 7% 0); transform: translate(-2px, 2px); }
-  100% { clip-path: inset(58% 0 43% 0); transform: translate(1px, -2px); }
-}
-
-@keyframes glitch-2 {
-  0% { clip-path: inset(65% 0 13% 0); transform: translate(2px, 1px); }
-  20% { clip-path: inset(79% 0 14% 0); transform: translate(-1px, -2px); }
-  40% { clip-path: inset(48% 0 38% 0); transform: translate(1px, -1px); }
-  60% { clip-path: inset(10% 0 75% 0); transform: translate(-2px, 1px); }
-  80% { clip-path: inset(29% 0 50% 0); transform: translate(2px, -2px); }
-  100% { clip-path: inset(15% 0 62% 0); transform: translate(-1px, 2px); }
-}
-
-/* ── Smooth scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ── Scrollbar in panels ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
+  background: rgba(220, 168, 66, 0.18);
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(220, 168, 66, 0.32);
 }
 
-/* ── Canvas ── */
-canvas {
-  image-rendering: auto;
-  background: radial-gradient(ellipse at 30% 20%, rgba(28, 24, 18, 1) 0%, #0d0c0b 60%),
-              radial-gradient(ellipse at 70% 80%, rgba(20, 16, 12, 1) 0%, #0d0c0b 60%);
+/* ── Prevent text selection during planet drag attempts ── */
+.select-none { user-select: none; -webkit-user-select: none; }
+
+/* ── Focus ring ── */
+button:focus-visible {
+  outline: 1px solid rgba(220, 168, 66, 0.5);
+  outline-offset: 2px;
 }
+
+canvas { image-rendering: auto; }
