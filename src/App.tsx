@@ -545,11 +545,14 @@ function InteractiveBackground() {
       }
 
       if (!isMobile && mouse.x > 0) {
-        const glow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 250);
-        glow.addColorStop(0, `rgba(220, 168, 66, 0.025)`); 
+        // Reduced size from 250 radius to 150 radius, drastically reducing pixel fill rate
+        const glow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 150);
+        glow.addColorStop(0, `rgba(220, 168, 66, 0.03)`); 
         glow.addColorStop(1, `rgba(0, 0, 0, 0)`);
         ctx.fillStyle = glow;
-        ctx.fillRect(mouse.x - 250, mouse.y - 250, 500, 500);
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 150, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       animationRef.current = requestAnimationFrame(animate);
@@ -834,36 +837,32 @@ function Navigation() {
   );
 }
 
-// ─── THE HYPER-SPATIAL Z-DRIVE ENGINE ───
-// ─── THE HYPER-SPATIAL Z-DRIVE ENGINE (v2: Magnetic & Silky) ───
+// ─── THE HYPER-SPATIAL Z-DRIVE ENGINE (v3: High Performance 60FPS) ───
 function ZDriveLayer({ children, index, total = 5, id, className }: { children: React.ReactNode; index: number; total?: number; id?: string; className?: string }) {
   const { scrollYProgress } = useScroll();
   const isTouch = useIsTouchDevice();
   const [isActive, setIsActive] = useState(false);
 
-  // The critical math fix: total - 1 ensures the last section lands exactly at the end of the scroll
   const step = 1 / Math.max(1, total - 1); 
   const enter = index * step - step;     
   const land = index * step;            
-  const linger = index * step + (step * 0.15); // Shorter linger so it snaps out faster
+  const linger = index * step + (step * 0.15); 
   const exit = index * step + step;      
 
-  // Reduced massive depths for higher performance and less "empty void" scrolling
+  // Hardware-accelerated properties only (z, opacity, rotateX, scale)
   const z = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? -3000 : -3500, 0, 0, isTouch ? 500 : 3000]);
-  const opacity = useTransform(scrollYProgress, [enter + (step * 0.2), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [enter + (step * 0.15), land, linger, exit - (step * 0.1)], [0, 1, 1, 0]);
   const rotateX = useTransform(scrollYProgress, [enter, land, linger, exit], [isTouch ? 15 : 45, 0, 0, isTouch ? -15 : -45]);
   
-  // Capped blur at 20px to eliminate rendering lag on GPUs
-  const blurValue = useTransform(scrollYProgress, [enter, land, linger, exit], [20, 0, 0, 20]);
-  const filter = useMotionTemplate`blur(${blurValue}px)`;
+  // Replaced the expensive GPU blur with a cheap 2D scale to simulate entering/leaving focus
+  const scale = useTransform(scrollYProgress, [enter, land, linger, exit], [0.8, 1, 1, 1.2]);
 
-  // Supercharged Springs: Low mass, high stiffness = silky and instantaneous
-  const smoothZ = useSpring(z, { damping: 20, stiffness: 300, mass: 0.1 });
-  const smoothOpacity = useSpring(opacity, { damping: 20, stiffness: 300, mass: 0.1 });
-  const smoothRotateX = useSpring(rotateX, { damping: 20, stiffness: 300, mass: 0.1 });
+  const smoothZ = useSpring(z, { damping: 25, stiffness: 300, mass: 0.1 });
+  const smoothOpacity = useSpring(opacity, { damping: 25, stiffness: 300, mass: 0.1 });
+  const smoothRotateX = useSpring(rotateX, { damping: 25, stiffness: 300, mass: 0.1 });
+  const smoothScale = useSpring(scale, { damping: 25, stiffness: 300, mass: 0.1 });
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    // Only activate pointer events when the layer is dead center
     if (latest >= enter + (step * 0.2) && latest <= exit - (step * 0.2)) {
       setIsActive(true);
     } else {
@@ -878,11 +877,12 @@ function ZDriveLayer({ children, index, total = 5, id, className }: { children: 
         z: smoothZ,
         opacity: smoothOpacity,
         rotateX: smoothRotateX,
-        filter: isTouch ? "none" : filter,
+        scale: smoothScale,
         pointerEvents: isActive ? "auto" : "none",
         transformOrigin: "center center",
       }}
-      className="absolute inset-0 flex items-center justify-center w-full h-full will-change-transform transform-style-3d px-5 md:px-8"
+      // will-change: transform, opacity tells the GPU to pre-allocate memory
+      className="absolute inset-0 flex items-center justify-center w-full h-full will-change-[transform,opacity] transform-style-3d px-5 md:px-8"
     >
       <div className={cn("w-full max-w-7xl mx-auto", className)}>
         {children}
