@@ -90,7 +90,8 @@
   html {
     @apply font-sans bg-[#0d0c0b];
     scroll-snap-type: y mandatory;
-    overscroll-behavior-y: none; /* Stops the "bounce" effect at top and bottom */
+    overscroll-behavior-y: none; 
+    scroll-behavior: auto !important; /* Forces instant snapping so 3D springs handle the visuals */
   }
   
   body {
