@@ -397,17 +397,17 @@ function InteractiveBackground() {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
     const orbColors = [
-      "120, 200, 255",
-      "80, 140, 255",
-      "160, 100, 255",
-      "100, 220, 200",
-      "60, 100, 180",
+      "220, 168, 66",  /* Gold */
+      "242, 235, 217", /* Champagne */
+      "180, 130, 60",  /* Soft Bronze */
+      "200, 150, 50",  /* Muted Amber */
+      "255, 245, 230", /* Warm White */
     ];
 
     const particleColors = [
-      "255, 255, 255",
-      "180, 200, 255",
-      "140, 170, 255",
+      "255, 245, 230",
+      "220, 168, 66",
+      "180, 130, 60",
     ];
 
     let width = window.innerWidth;
@@ -546,7 +546,7 @@ function InteractiveBackground() {
 
       if (!isMobile && mouse.x > 0) {
         const glow = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 250);
-        glow.addColorStop(0, `rgba(120, 180, 255, 0.025)`);
+        glow.addColorStop(0, `rgba(220, 168, 66, 0.025)`); 
         glow.addColorStop(1, `rgba(0, 0, 0, 0)`);
         ctx.fillStyle = glow;
         ctx.fillRect(mouse.x - 250, mouse.y - 250, 500, 500);
@@ -968,12 +968,12 @@ export default function App() {
                       className="group relative px-8 md:px-10 py-4 bg-white text-black text-[12px] uppercase tracking-[0.3em] font-semibold rounded-full overflow-hidden text-center"
                     >
                       <motion.div
-                        className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500"
+                        className="absolute inset-0 bg-linear-to-r from-amber-500 to-yellow-600"
                         initial={{ x: "-100%" }}
                         whileHover={{ x: 0 }}
                         transition={{ duration: 0.4 }}
                       />
-                      <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-white transition-colors">
+                      <span className="relative z-10 flex items-center justify-center gap-3 group-hover:text-yellow-600 transition-colors">
                         Explore Work
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </span>
