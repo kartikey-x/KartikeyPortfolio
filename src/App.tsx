@@ -78,6 +78,7 @@ const ME = {
 
 type Section = "home" | "about" | "projects" | "skills" | "contact";
 
+// Orbit radiuses increased to accommodate larger desktop planets
 const NAV: Array<{
   id: Exclude<Section, "home">;
   label: string;
@@ -89,10 +90,10 @@ const NAV: Array<{
   rgb: string;
   period: number;
 }> = [
-  { id: "about",    label: "About",    sub: "Who I am",        icon: User,   angle: -75,  orbitR: 225, color: "#dca842", rgb: "220,168,66",  period: 12 },
-  { id: "projects", label: "Projects", sub: "What I've built", icon: Layers, angle: 15,   orbitR: 260, color: "#60a5fa", rgb: "96,165,250",  period: 18 },
-  { id: "skills",   label: "Skills",   sub: "What I know",     icon: Zap,    angle: 105,  orbitR: 235, color: "#f472b6", rgb: "244,114,182", period: 22 },
-  { id: "contact",  label: "Contact",  sub: "Let's connect",   icon: Mail,   angle: 200,  orbitR: 250, color: "#34d399", rgb: "52,211,153",  period: 15 },
+  { id: "about",    label: "About",    sub: "Who I am",        icon: User,   angle: -75,  orbitR: 245, color: "#dca842", rgb: "220,168,66",  period: 12 },
+  { id: "projects", label: "Projects", sub: "What I've built", icon: Layers, angle: 15,   orbitR: 285, color: "#60a5fa", rgb: "96,165,250",  period: 18 },
+  { id: "skills",   label: "Skills",   sub: "What I know",     icon: Zap,    angle: 105,  orbitR: 255, color: "#f472b6", rgb: "244,114,182", period: 22 },
+  { id: "contact",  label: "Contact",  sub: "Let's connect",   icon: Mail,   angle: 200,  orbitR: 275, color: "#34d399", rgb: "52,211,153",  period: 15 },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -264,12 +265,12 @@ function Cursor() {
 
   return (
     <>
-      <motion.div className="fixed top-0 left-0 pointer-events-none z-9999"
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-[9999]"
         style={{ x: cx, y: cy, translateX: "-50%", translateY: "-50%" }}
         animate={{ scale: clicking ? 0.3 : hot ? 0.25 : 1 }} transition={{ duration: 0.12 }}>
         <div className="w-2.5 h-2.5 rounded-full bg-white mix-blend-difference" />
       </motion.div>
-      <motion.div className="fixed top-0 left-0 pointer-events-none z-9998"
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-[9998]"
         style={{ x: fx, y: fy, translateX: "-50%", translateY: "-50%" }}
         animate={{ scale: clicking ? 0.85 : hot ? 2 : 1 }} transition={{ duration: 0.22 }}>
         <motion.div className="w-9 h-9 rounded-full border"
@@ -349,24 +350,24 @@ function Planet({ item, onClick, index }: { item: typeof NAV[number]; onClick: (
         transition={{ duration: 6 + index * 1.5, repeat: Infinity, ease: "easeInOut" }}
       >
         <motion.div
-          className="relative w-24 h-24 rounded-full flex items-center justify-center backdrop-blur-md overflow-hidden"
+          className="relative w-28 h-28 rounded-full flex items-center justify-center backdrop-blur-md overflow-hidden"
           animate={{
             boxShadow: hov
-              ? `0 0 0 1px ${item.color}70, inset 0 0 25px ${item.color}40, 0 15px 40px rgba(${item.rgb},0.4)`
-              : `0 0 0 1px ${item.color}25, inset 0 0 12px ${item.color}15, 0 10px 25px rgba(${item.rgb},0.15)`,
+              ? `0 0 0 1px ${item.color}70, inset 0 0 30px ${item.color}40, 0 15px 40px rgba(${item.rgb},0.4)`
+              : `0 0 0 1px ${item.color}25, inset 0 0 15px ${item.color}15, 0 10px 25px rgba(${item.rgb},0.15)`,
             scale: hov ? 1.08 : 1
           }}
           transition={{ duration: 0.4 }}
           style={{ background: `linear-gradient(135deg, rgba(${item.rgb}, 0.15) 0%, rgba(255,255,255,0.02) 100%)` }}
         >
           {/* Subtle inner glowing core behind icon */}
-          <motion.div className="absolute w-12 h-12 rounded-full"
+          <motion.div className="absolute w-16 h-16 rounded-full"
             style={{ background: `radial-gradient(circle, ${item.color}60 0%, transparent 70%)`, opacity: hov ? 0.8 : 0.4 }}
             animate={{ scale: hov ? [1, 1.3, 1] : 1 }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} />
 
-          {/* Premium Lucide Icon */}
-          <Icon className="relative z-10 w-10 h-10 transition-transform duration-500"
+          {/* Premium Lucide Icon - Larger on desktop */}
+          <Icon className="relative z-10 w-14 h-14 transition-transform duration-500"
             style={{ color: item.color, filter: `drop-shadow(0 0 8px ${item.color}90)` }}
             strokeWidth={1.5} />
 
@@ -384,8 +385,8 @@ function Planet({ item, onClick, index }: { item: typeof NAV[number]; onClick: (
         {/* Outer label */}
         <motion.div className="flex flex-col items-center gap-1"
           animate={{ opacity: hov ? 1 : 0.6, y: hov ? 0 : -4 }} transition={{ duration: 0.3 }}>
-          <span className="text-sm font-black tracking-widest uppercase drop-shadow-md" style={{ color: item.color }}>{item.label}</span>
-          <span className="text-[10px] text-white/40 leading-none">{item.sub}</span>
+          <span className="text-[15px] font-black tracking-widest uppercase drop-shadow-md" style={{ color: item.color }}>{item.label}</span>
+          <span className="text-[11px] text-white/40 leading-none">{item.sub}</span>
         </motion.div>
 
       </motion.button>
@@ -414,7 +415,7 @@ function HomeScreen({ onNav, isMobile }: { onNav: (s: Section) => void; isMobile
 
       {isMobile ? (
         <div className="w-full h-full overflow-y-auto px-6 py-16 flex flex-col items-center gap-8" style={{ scrollbarWidth: "none" }}>
-          {/* Mobile Identity Core */}
+          {/* Mobile Identity Core (Kept optimal size for mobile) */}
           <Up delay={0.1} className="flex flex-col items-center gap-3">
             <motion.div className="relative" animate={{ y: [-4, 4, -4] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
               <div className="w-24 h-24 rounded-full overflow-hidden backdrop-blur-md"
@@ -467,9 +468,9 @@ function HomeScreen({ onNav, isMobile }: { onNav: (s: Section) => void; isMobile
           </Up>
         </div>
       ) : (
-        <div className="relative" style={{ width: 620, height: 620 }}>
+        <div className="relative" style={{ width: 680, height: 680 }}>
           {/* Gently rotating Orbit Rings */}
-          {[200, 235, 265].map((r, i) => (
+          {[225, 260, 290].map((r, i) => (
             <motion.div key={i} className="absolute rounded-full pointer-events-none"
               style={{ width: r * 2, height: r * 2, top: "50%", left: "50%",
                 border: "1px dashed rgba(255,255,255,0.05)" }} 
@@ -478,14 +479,14 @@ function HomeScreen({ onNav, isMobile }: { onNav: (s: Section) => void; isMobile
               />
           ))}
           
-          {/* Central Identity Core */}
+          {/* Central Identity Core (Bigger for Desktop) */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 z-10">
             <Up delay={0.1}>
               <motion.div animate={{ y: [-6, 6, -6] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
                 <Magnetic strength={0.12}>
                   <motion.div className="relative" whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 400, damping: 28 }}>
-                    <motion.div className="w-28 h-28 rounded-full overflow-hidden backdrop-blur-md"
+                    <motion.div className="w-32 h-32 rounded-full overflow-hidden backdrop-blur-md"
                       animate={{ boxShadow: [
                         "0 0 0 1px rgba(220,168,66,0.3), 0 0 40px rgba(220,168,66,0.15)",
                         "0 0 0 1px rgba(220,168,66,0.5), 0 0 70px rgba(220,168,66,0.3)",
@@ -498,8 +499,8 @@ function HomeScreen({ onNav, isMobile }: { onNav: (s: Section) => void; isMobile
                           el.style.display = "none";
                         }} />
                     </motion.div>
-                    <div className="absolute bottom-1 right-1 w-5 h-5 rounded-full"
-                      style={{ background: "#34d399", border: "3px solid #090807", boxShadow: "0 0 15px rgba(52,211,153,0.6)" }} />
+                    <div className="absolute bottom-1 right-1 w-6 h-6 rounded-full"
+                      style={{ background: "#34d399", border: "4px solid #090807", boxShadow: "0 0 15px rgba(52,211,153,0.6)" }} />
                   </motion.div>
                 </Magnetic>
               </motion.div>
@@ -846,7 +847,7 @@ function ContactPanel({ onBack }: { onBack: () => void }) {
 export default function App() {
   const [section, setSection] = useState<Section>("home");
   const [warp, setWarp] = useState(false);
-  const isMobile = useMobile(); // Much more robust mobile check
+  const isMobile = useMobile(); 
 
   const navigate = useCallback((to: Section) => {
     if (to === section) return;
@@ -894,7 +895,7 @@ export default function App() {
       {/* Premium Warp Flash */}
       <AnimatePresence>
         {warp && (
-          <motion.div key="wf" className="fixed inset-0 pointer-events-none z-100"
+          <motion.div key="wf" className="fixed inset-0 pointer-events-none z-[100]"
             initial={{ opacity: 0 }} animate={{ opacity: [0, 0.35, 0.1, 0] }} exit={{ opacity: 0 }}
             transition={{ duration: 0.55, times: [0, 0.1, 0.4, 1] }}
             style={{ background: "radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.25) 0%,rgba(255,255,255,0.05) 50%,transparent 100%)" }} />
