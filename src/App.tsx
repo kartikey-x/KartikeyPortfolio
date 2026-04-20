@@ -265,12 +265,12 @@ function Cursor() {
 
   return (
     <>
-      <motion.div className="fixed top-0 left-0 pointer-events-none z-[9999]"
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-9999"
         style={{ x: cx, y: cy, translateX: "-50%", translateY: "-50%" }}
         animate={{ scale: clicking ? 0.3 : hot ? 0.25 : 1 }} transition={{ duration: 0.12 }}>
         <div className="w-2.5 h-2.5 rounded-full bg-white mix-blend-difference" />
       </motion.div>
-      <motion.div className="fixed top-0 left-0 pointer-events-none z-[9998]"
+      <motion.div className="fixed top-0 left-0 pointer-events-none z-9998"
         style={{ x: fx, y: fy, translateX: "-50%", translateY: "-50%" }}
         animate={{ scale: clicking ? 0.85 : hot ? 2 : 1 }} transition={{ duration: 0.22 }}>
         <motion.div className="w-9 h-9 rounded-full border"
@@ -895,7 +895,7 @@ export default function App() {
       {/* Premium Warp Flash */}
       <AnimatePresence>
         {warp && (
-          <motion.div key="wf" className="fixed inset-0 pointer-events-none z-[100]"
+          <motion.div key="wf" className="fixed inset-0 pointer-events-none z-100"
             initial={{ opacity: 0 }} animate={{ opacity: [0, 0.35, 0.1, 0] }} exit={{ opacity: 0 }}
             transition={{ duration: 0.55, times: [0, 0.1, 0.4, 1] }}
             style={{ background: "radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.25) 0%,rgba(255,255,255,0.05) 50%,transparent 100%)" }} />
